@@ -39,14 +39,14 @@ class LoginScreen extends StatelessWidget {
               ),
               // Aquí está la magia:
               onPressed: () async {
-                print("🔵 Botón pulsado. Iniciando login...");
+                print("Botón pulsado. Iniciando login...");
 
                 // 1. Llamamos a tu servicio (que ya arreglamos)
                 final userCredential = await AuthService().signInWithGoogle();
 
                 // 2. Comprobamos si salió bien
                 if (userCredential != null) {
-                  print("🟢 Login Éxito: ${userCredential.user?.email}");
+                  print("Login Éxito: ${userCredential.user?.displayName}");
 
                   // 3. NAVEGACIÓN: Cambiamos de pantalla
                   // El 'if (context.mounted)' es vital en Flutter moderno para evitar errores
@@ -59,7 +59,7 @@ class LoginScreen extends StatelessWidget {
                     );
                   }
                 } else {
-                  print("🔴 Login fallido o cancelado");
+                  print("Login fallido o cancelado");
 
                   // Opcional: Mostrar un aviso al usuario si falló
                   if (context.mounted) {

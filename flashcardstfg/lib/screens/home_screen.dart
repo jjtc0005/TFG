@@ -14,8 +14,8 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       // 1. Barra Superior
       appBar: AppBar(
-        title: const Text('Mis Mazos'),
-        centerTitle: true, // Centra el título (estilo iOS/Android moderno)
+        title: const Text('Mis Apuntes'),
+        centerTitle: true, // Centra el título 
         actions: [
           // Botón de Cerrar Sesión
           IconButton(

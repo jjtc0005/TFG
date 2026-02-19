@@ -8,6 +8,7 @@ class AuthService {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
+
       const String webClientid =
           "607082432922-4r419edu0h5mn6jginlfeshnr9qe4g9m.apps.googleusercontent.com";
 
@@ -19,8 +20,6 @@ class AuthService {
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       // 3. Crear credencial para Firebase
-      // ⚠️ AQUÍ ESTÁ EL CAMBIO: Solo enviamos el idToken.
-      // El accessToken lo ponemos a null porque ya no viene en googleAuth.
       final credential = GoogleAuthProvider.credential(
         accessToken: null,
         idToken: googleAuth.idToken,
@@ -38,12 +37,10 @@ class AuthService {
 
       return userCredential;
     } catch (e) {
-      print("❌ Error en el login de Google: $e");
+      print("Error en el login de Google: $e");
       return null;
     }
   }
-
-  // ... (El resto de métodos signOut y _guardarUsuario déjalos igual) ...
 
   Future<void> signOut() async {
     await _googleSignIn.signOut();
@@ -58,7 +55,7 @@ class AuthService {
       final Map<String, dynamic> datosUsuario = {
         'email': user.email,
         'nombre': user.displayName ?? 'Usuario sin nombre',
-        'foto': user.photoURL,
+        'foto': user.photoURL ?? null,
         'ultima_conexion': FieldValue.serverTimestamp(),
       };
       await docUser.set(datosUsuario, SetOptions(merge: true));
