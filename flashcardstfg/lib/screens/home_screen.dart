@@ -1,3 +1,4 @@
+import 'package:flashcardstfg/screens/create_flashcard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Para saber quién es el usuario
 import '../services/auth_services.dart';
@@ -15,7 +16,7 @@ class HomeScreen extends StatelessWidget {
       // 1. Barra Superior
       appBar: AppBar(
         title: const Text('Mis Apuntes'),
-        centerTitle: true, // Centra el título 
+        centerTitle: true, // Centra el título
         actions: [
           // Botón de Cerrar Sesión
           IconButton(
@@ -33,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                 );
               }
             },
-          )
+          ),
         ],
       ),
 
@@ -56,7 +57,7 @@ class HomeScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            
+
             const Text(
               'Bienvenido a tu zona de estudio',
               style: TextStyle(color: Colors.grey),
@@ -68,6 +69,14 @@ class HomeScreen extends StatelessWidget {
       // 3. Botón flotante (para añadir mazos en el futuro)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          if (context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CreateFlashcardScreen(),
+              ),
+            );
+          }
           print("Botón Crear pulsado");
         },
         child: const Icon(Icons.add),
