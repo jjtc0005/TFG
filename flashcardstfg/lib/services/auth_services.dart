@@ -54,7 +54,7 @@ class AuthService {
           .doc(user.uid);
       final Map<String, dynamic> datosUsuario = {
         'email': user.email,
-        'nombre': user.displayName ?? 'Usuario sin nombre',
+        'nombre': user.displayName ?? 'Usuario sin nombre', 
         'foto': user.photoURL ?? null,
         'ultima_conexion': FieldValue.serverTimestamp(),
       };
