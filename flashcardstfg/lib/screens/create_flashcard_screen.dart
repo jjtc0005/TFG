@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
@@ -22,7 +23,8 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _almacenController = TextEditingController();
   final TextEditingController _numTarjetasController = TextEditingController();
-  final TextEditingController _apuntesController = TextEditingController(); // NUEVO: Para leer los apuntes
+  final TextEditingController _apuntesController =
+      TextEditingController(); // NUEVO: Para leer los apuntes
 
   // Estado del selector (por defecto en texto)
   MetodoEntrada _metodoSeleccionado = MetodoEntrada.texto;
@@ -97,7 +99,12 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
   // --- FUNCIÓN DE INTELIGENCIA ARTIFICIAL ACTUALIZADA ---
   Future<void> _generarConIA() async {
-    const apiKey = 'AIzaSyBNyetBhigUkCuJyd93Q-lo3DYVyLNIXJg'; // Tu clave
+    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? ''; // Tu clave
+
+    if (apiKey.isEmpty) {
+      print("Error en la lectura de la api");
+      return;
+    }
 
     final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
 
@@ -154,7 +161,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       print("Gemini ha respondido!");
 
       log(response.text ?? "No hay texto ");
-
     } catch (e) {
       print("Error al hablar con Gemini: $e");
     }
