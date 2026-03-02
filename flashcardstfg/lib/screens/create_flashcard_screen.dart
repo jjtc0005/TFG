@@ -97,8 +97,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
   // --- FUNCIÓN DE INTELIGENCIA ARTIFICIAL ACTUALIZADA ---
   Future<void> _generarConIA() async {
-    const apiKey = 'AIzaSyBNyetBhigUkCuJyd93Q-lo3DYVyLNIXJg'; // Tu clave
-
     final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
 
     final cantidad = _numTarjetasController.text;
