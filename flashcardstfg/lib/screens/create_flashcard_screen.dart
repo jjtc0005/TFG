@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcardstfg/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io';
@@ -23,8 +27,11 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _almacenController = TextEditingController();
   final TextEditingController _numTarjetasController = TextEditingController();
-  final TextEditingController _apuntesController =
-      TextEditingController(); // NUEVO: Para leer los apuntes
+  final TextEditingController _apuntesController = TextEditingController();
+
+  // --- NUEVAS VARIABLES PARA EL DESPLEGABLE DE CARPETAS ---
+  String? _carpetaSeleccionada;
+  bool _creandoNuevaCarpeta = false;
 
   // Estado del selector (por defecto en texto)
   MetodoEntrada _metodoSeleccionado = MetodoEntrada.texto;
@@ -37,13 +44,12 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   File? _archivoSeleccionado;
   String? _nombreArchivo;
 
-  /// Método que limpia la memoria o el estado cuando se cierra la ventana
   @override
   void dispose() {
     _tituloController.dispose();
     _almacenController.dispose();
     _numTarjetasController.dispose();
-    _apuntesController.dispose(); // Limpiamos el nuevo controlador
+    _apuntesController.dispose();
     super.dispose();
   }
 
@@ -97,9 +103,9 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     });
   }
 
-  // --- FUNCIÓN DE INTELIGENCIA ARTIFICIAL ACTUALIZADA ---
+  /// Función que envía el prompt a la IA de Google Gemini
   Future<void> _generarConIA() async {
-    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? ''; // Tu clave
+    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
     if (apiKey.isEmpty) {
       print("Error en la lectura de la api");
@@ -107,29 +113,25 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     }
 
     final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
-
     final cantidad = _numTarjetasController.text;
-    final tema = _tituloController.text;
-    String contexto = ""; // <--- AQUÍ GUARDAMOS EL TEXTO, FOTO O PDF
+    String contexto = "";
 
     // 1. Comprobamos qué método ha elegido el usuario
     if (_metodoSeleccionado == MetodoEntrada.texto) {
       if (_apuntesController.text.isEmpty) {
         print("Error: No has escrito nada en los apuntes.");
-        return; // Cortamos la ejecución si está vacío
+        return;
       }
       contexto = _apuntesController.text;
     } else if (_metodoSeleccionado == MetodoEntrada.imagen) {
-      // TODO: Próximo paso
       print("Aún tenemos que programar cómo enviarle la foto a Gemini.");
       return;
     } else if (_metodoSeleccionado == MetodoEntrada.archivo) {
-      // TODO: Próximo paso
       print("Aún tenemos que programar cómo enviarle el PDF a Gemini.");
       return;
     }
 
-    // 2. ¡El Súper Prompt! Ahora incluye el contexto del usuario
+    // 2. ¡El Súper Prompt!
     final prompt =
         '''
       Eres un experto en crear material de estudio efectivo. Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el texto proporcionado.
@@ -152,15 +154,13 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     ''';
 
     try {
-      print("⏳ Leyendo tus apuntes y enviando a Gemini...");
-      print("Se han pedido $cantidad de flashcards ");
-
-      // Enviamos el súper prompt
+      print("Leyendo tus apuntes y enviando a Gemini...");
       final response = await model.generateContent([Content.text(prompt)]);
 
       print("Gemini ha respondido!");
+      log(" La respuesta del Gemini por log es: ${response.text} ");
 
-      log(response.text ?? "No hay texto ");
+      _guardarRepuestaBbdd(response.text ?? '');
     } catch (e) {
       print("Error al hablar con Gemini: $e");
     }
@@ -170,7 +170,27 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear flashcards'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Crear flashcards'),
+        centerTitle: true,
+        // --- BOTÓN DE VOLVER ATRÁS MEJORADO ---
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // 1. Intentamos volver de forma natural (funciona si usaste Navigator.push)
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              // 2. Si no hay historial, forzamos la navegación al Home
+              // ⚠️ IMPORTANTE: Cambia "HomeScreen()" por el nombre real de tu pantalla principal
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()), // <-- PON AQUÍ TU PANTALLA
+              );
+            }
+          },
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -200,13 +220,89 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               ),
               const SizedBox(height: 16),
 
-              TextFormField(
-                controller: _almacenController,
-                decoration: const InputDecoration(
-                  labelText: 'Almacén / Carpeta (Opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.folder),
-                ),
+              // --- SELECTOR DE CARPETAS CON FIREBASE ---
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                    .collection('Carpetas')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  List<DropdownMenuItem<String>> opciones = [];
+
+                  // Añadimos las carpetas existentes
+                  for (var doc in snapshot.data!.docs) {
+                    String nombre = doc['Nombre'] ?? 'Sin nombre';
+                    opciones.add(
+                      DropdownMenuItem(value: nombre, child: Text(nombre)),
+                    );
+                  }
+
+                  // Añadimos la opción de crear una nueva
+                  opciones.add(
+                    const DropdownMenuItem(
+                      value: 'NUEVA',
+                      child: Text(
+                        '➕ Crear nueva carpeta...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  );
+
+                  return Column(
+                    children: [
+                      DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(
+                          labelText: 'Selecciona una Carpeta',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.folder),
+                        ),
+                        items: opciones,
+                        value:
+                            opciones.any(
+                              (item) => item.value == _carpetaSeleccionada,
+                            )
+                            ? _carpetaSeleccionada
+                            : null,
+                        onChanged: (String? nuevoValor) {
+                          setState(() {
+                            _carpetaSeleccionada = nuevoValor;
+                            _creandoNuevaCarpeta = (nuevoValor == 'NUEVA');
+                          });
+                        },
+                        validator: (value) =>
+                            value == null ? 'Selecciona una carpeta' : null,
+                      ),
+
+                      // Si elige crear nueva, mostramos el campo de texto
+                      if (_creandoNuevaCarpeta) ...[
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _almacenController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nombre de la nueva carpeta',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.create_new_folder),
+                          ),
+                          validator: (value) {
+                            if (_creandoNuevaCarpeta &&
+                                (value == null || value.isEmpty)) {
+                              return 'Escribe el nombre de la carpeta';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 16),
 
@@ -264,8 +360,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               // --- ÁREA DINÁMICA ---
               if (_metodoSeleccionado == MetodoEntrada.texto)
                 TextFormField(
-                  controller:
-                      _apuntesController, // <-- AÑADIDO: Ahora guardará lo que escribas
+                  controller: _apuntesController,
                   maxLines: 6,
                   decoration: const InputDecoration(
                     labelText: 'Pega aquí tus apuntes...',
@@ -391,5 +486,112 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         ],
       ),
     );
+  }
+
+  // --- GUARDAR EN BBDD ---
+  Future<void> _guardarRepuestaBbdd(String respuestaGemini) async {
+    try {
+      final usuario = FirebaseAuth.instance.currentUser;
+
+      if (usuario == null) {
+        print("Error: Nadie ha iniciado sesión.");
+        return;
+      }
+
+      String jsonLimpio = respuestaGemini
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
+
+      print("Procesando las tarjetas...");
+      List<dynamic> tarjetasGeneradas = jsonDecode(jsonLimpio);
+
+      // --- NUEVA LÓGICA DE CARPETA (Dropdown vs Input) ---
+      String nombreCarpeta = "General";
+
+      if (_creandoNuevaCarpeta && _almacenController.text.isNotEmpty) {
+        nombreCarpeta = _almacenController.text;
+      } else if (_carpetaSeleccionada != null &&
+          _carpetaSeleccionada != 'NUEVA') {
+        nombreCarpeta = _carpetaSeleccionada!;
+      }
+
+      final carpetaPath = FirebaseFirestore.instance
+          .collection('users')
+          .doc(usuario.uid)
+          .collection('Carpetas');
+
+      String carpetaDestino;
+
+      final busqueda = await carpetaPath
+          .where("Nombre", isEqualTo: nombreCarpeta)
+          .get();
+
+      if (busqueda.docs.isNotEmpty) {
+        carpetaDestino = busqueda.docs.first.id;
+        print("Carpeta encontrada con ID $carpetaDestino");
+      } else {
+        final nuevaCarpeta = await carpetaPath.add({
+          "Nombre": nombreCarpeta,
+          "fechaCreacion": FieldValue.serverTimestamp(),
+        });
+        carpetaDestino = nuevaCarpeta.id;
+        print("Nueva carpeta generada con id: $carpetaDestino");
+      }
+
+      print(
+        "Subiendo ${tarjetasGeneradas.length} flashcards a la base de datos...",
+      );
+
+      final flashcardsRef = carpetaPath
+          .doc(carpetaDestino)
+          .collection('Flashcards');
+
+      for (var tarjeta in tarjetasGeneradas) {
+        await flashcardsRef.add({
+          'pregunta': tarjeta['pregunta'],
+          'respuesta': tarjeta['respuesta'],
+          'titulo_mazo': _tituloController.text,
+          'fechaCreacion': FieldValue.serverTimestamp(),
+          'nivel': 0,
+        });
+      }
+
+      // 6. Mensaje de éxito y limpieza
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('¡Flashcards creadas y guardadas con éxito! 🎉'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        _tituloController.clear();
+        _numTarjetasController.clear();
+        _apuntesController.clear();
+        if (_creandoNuevaCarpeta) {
+          _almacenController.clear();
+        }
+
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else {
+          setState(() {
+            _carpetaSeleccionada = null;
+            _creandoNuevaCarpeta = false;
+          });
+        }
+      }
+    } catch (e) {
+      print("❌ Error al guardar en Firebase: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al procesar o guardar las tarjetas.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
