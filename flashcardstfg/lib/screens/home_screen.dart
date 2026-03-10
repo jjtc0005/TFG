@@ -1,86 +1,266 @@
-import 'package:flashcardstfg/screens/create_flashcard_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Para saber quién es el usuario
-import '../services/auth_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // <-- AÑADIDO: Para leer la base de datos
+import 'package:google_sign_in/google_sign_in.dart';
+import 'create_flashcard_screen.dart';
 import 'login_screen.dart';
+import 'study_screen.dart'; // Asegúrate de que la ruta sea correcta
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Obtenemos el usuario actual que acaba de iniciar sesión
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      // 1. Barra Superior
       appBar: AppBar(
         title: const Text('Mis Apuntes'),
-        centerTitle: true, // Centra el título
+        centerTitle: true,
         actions: [
-          // Botón de Cerrar Sesión
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar Sesión',
-            onPressed: () async {
-              // 1. Cerramos sesión en Firebase y Google
-              await AuthService().signOut();
+            onPressed: () => _cerrarSesion(context),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // --- 1. CABECERA CON SALUDO ---
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              children: [
+                if (user?.photoURL != null)
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(user!.photoURL!),
+                  )
+                else
+                  const CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.blue,
+                    child: Icon(Icons.person, color: Colors.white, size: 30),
+                  ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '¡Hola, ${user?.displayName?.split(' ').first ?? 'Estudiante'}!',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        '¿Qué vamos a estudiar hoy?',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-              // 2. Volvemos a la pantalla de Login
-              if (context.mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+          const Divider(),
+
+          // --- 2. TÍTULO DE LA SECCIÓN ---
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Tus Mazos',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+
+          // --- 3. CUADRÍCULA DE CARPETAS DESDE FIREBASE ---
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user?.uid)
+                  .collection('Carpetas')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                // Mientras carga...
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                // Si hay un error...
+                if (snapshot.hasError) {
+                  print("🔥 ERROR DE FIREBASE: ${snapshot.error}"); // Nos lo chivará en la consola
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        'Error de Firebase:\n${snapshot.error}', 
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  );
+                }
+
+                // Si no tiene carpetas aún...
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.folder_off,
+                          size: 60,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Aún no tienes mazos.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        const Text(
+                          'Usa el botón + para crear uno con IA.',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Si todo va bien, mostramos las carpetas
+                final carpetas = snapshot.data!.docs;
+
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, // 2 columnas
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.1, // Forma un poco más cuadrada
+                  ),
+                  itemCount: carpetas.length,
+                  itemBuilder: (context, index) {
+                    final carpeta = carpetas[index];
+                    final nombreCarpeta = carpeta['Nombre'] ?? 'Sin nombre';
+                    final idCarpeta = carpeta.id;
+
+                    return Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => StudyScreen(
+                                carpetaId: idCarpeta,
+                                nombreCarpeta: nombreCarpeta,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: LinearGradient(
+                              colors: [Colors.blue.shade50, Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.folder_special,
+                                size: 48,
+                                color: Colors.blueAccent,
+                              ),
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                ),
+                                child: Text(
+                                  nombreCarpeta,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow
+                                      .ellipsis, // Pone "..." si el texto es muy largo
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
-              }
-            },
+              },
+            ),
           ),
         ],
       ),
 
-      // 2. Cuerpo de la pantalla
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Foto de perfil (si tiene)
-            if (user?.photoURL != null)
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(user!.photoURL!),
-              ),
-            const SizedBox(height: 20),
-
-            // Saludo con el nombre
-            Text(
-              '¡Hola, ${user?.displayName ?? 'Estudiante'}!',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            const Text(
-              'Bienvenido a tu zona de estudio',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      ),
-
-      // 3. Botón flotante (para añadir mazos en el futuro)
-      floatingActionButton: FloatingActionButton(
+      // 4. BOTÓN FLOTANTE
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           if (context.mounted) {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const CreateFlashcardScreen(),
               ),
             );
           }
-          print("Botón Crear pulsado");
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.auto_awesome),
+        label: const Text('Crear Mazo'),
       ),
     );
+  }
+
+  // --- FUNCIÓN DE CERRAR SESIÓN (Ya perfecta) ---
+  Future<void> _cerrarSesion(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      final googleSignIn = GoogleSignIn.instance;
+      try {
+        await googleSignIn.disconnect();
+      } catch (e) {
+        print("Aviso al desconectar Google: $e");
+      }
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    } catch (e) {
+      print("Error general cerrando sesión: $e");
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    }
   }
 }
