@@ -116,35 +116,17 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     final cantidad = _numTarjetasController.text;
     String contexto = "";
 
-    // 1. Comprobamos qué método ha elegido el usuario
-    if (_metodoSeleccionado == MetodoEntrada.texto) {
-      if (_apuntesController.text.isEmpty) {
-        print("Error: No has escrito nada en los apuntes.");
-        return;
-      }
-      contexto = _apuntesController.text;
-    } else if (_metodoSeleccionado == MetodoEntrada.imagen) {
-      print("Aún tenemos que programar cómo enviarle la foto a Gemini.");
-      return;
-    } else if (_metodoSeleccionado == MetodoEntrada.archivo) {
-      print("Aún tenemos que programar cómo enviarle el PDF a Gemini.");
-      return;
-    }
+    List<Part> partesPrompt = [];
 
     // 2. ¡El Súper Prompt!
-    final prompt =
+    final promptInstrucciones =
         '''
-      Eres un experto en crear material de estudio efectivo. Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el texto proporcionado.
+      Eres un experto en crear material de estudio efectivo. Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el contenido que te proporciono.
       
       Reglas estrictas y obligatorias:
       1. CANTIDAD EXACTA: Debes devolver exactamente $cantidad tarjetas. Ni una más, ni una menos. Es tu prioridad máxima.
-      2. CÓMO LLEGAR AL NÚMERO: Si el texto parece corto, divide los conceptos grandes en preguntas más pequeñas y específicas. Pregunta por fechas exactas, nombres, definiciones individuales, causas por separado y consecuencias por separado. Exprime cada detalle del texto para alcanzar las $cantidad tarjetas.
-      3. VERACIDAD: Todo debe salir del texto de origen. No inventes datos externos.
-      
-      Texto de origen:
-      """
-      $contexto
-      """
+      2. CÓMO LLEGAR AL NÚMERO: Si el texto o documento parece corto, divide los conceptos grandes en preguntas más pequeñas y específicas. Exprime cada detalle para alcanzar las $cantidad tarjetas.
+      3. VERACIDAD: Todo debe salir del contenido proporcionado. No inventes datos externos.
       
       IMPORTANTE: Devuelve tu respuesta ÚNICAMENTE en el siguiente formato JSON exacto, sin comillas invertidas de markdown (```json), ni texto antes o después. Solo el array JSON puro:
       [
@@ -153,16 +135,84 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       ]
     ''';
 
+    if (_metodoSeleccionado == MetodoEntrada.texto) {
+      if (_apuntesController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Escribe unos apuntes primero"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      partesPrompt.add(
+        TextPart(
+          "$promptInstrucciones\n\nTexto de origen:\n${_apuntesController.text}",
+        ),
+      );
+    } else if (_metodoSeleccionado == MetodoEntrada.archivo) {
+      if (_archivoSeleccionado == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Selecciona un archivo con formato PDF o TXT primero."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      partesPrompt.add(TextPart(promptInstrucciones));
+
+      final bytesDelArchivo = await _archivoSeleccionado!.readAsBytes();
+      final nombreEnMinusculas = _nombreArchivo!.toLowerCase();
+
+      // Clasificamos el archivo para que Gemini sepa cómo leerlo
+      if (nombreEnMinusculas.endsWith('.pdf')) {
+        partesPrompt.add(DataPart('application/pdf', bytesDelArchivo));
+      } else if (nombreEnMinusculas.endsWith('.txt')) {
+        partesPrompt.add(DataPart('text/plain', bytesDelArchivo));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por ahora, la IA solo admite archivos PDF o TXT.'), backgroundColor: Colors.orange),
+        );
+        return;
+      }
+      
+    } else if (_metodoSeleccionado == MetodoEntrada.imagen) {
+      print("Aún tenemos que programar cómo enviarle la foto a Gemini.");
+      return;
+    }
+
     try {
-      print("Leyendo tus apuntes y enviando a Gemini...");
-      final response = await model.generateContent([Content.text(prompt)]);
+      print("Enviando datos a Gemini...");
+      
+      // Avisamos al usuario de que la IA está trabajando
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('La IA está leyendo tu contenido y creando las tarjetas...'), 
+          backgroundColor: Colors.blue,
+          duration: Duration(seconds: 4),
+        ),
+      );
 
-      print("Gemini ha respondido!");
-      log(" La respuesta del Gemini por log es: ${response.text} ");
+      // Usamos Content.multi para poder enviarle Texto + Archivo a la vez
+      final response = await model.generateContent([
+        Content.multi(partesPrompt)
+      ]);
+      
+      print("¡Gemini ha respondido!");
+      log("Respuesta en crudo: ${response.text}");
 
+      // Guardamos en Firebase (tu función que ya funciona perfecta)
       _guardarRepuestaBbdd(response.text ?? '');
+      
     } catch (e) {
       print("Error al hablar con Gemini: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error con la IA: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -182,10 +232,12 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               Navigator.pop(context);
             } else {
               // 2. Si no hay historial, forzamos la navegación al Home
-              // ⚠️ IMPORTANTE: Cambia "HomeScreen()" por el nombre real de tu pantalla principal
+              // IMPORTANTE: Cambia "HomeScreen()" por el nombre real de tu pantalla principal
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()), // <-- PON AQUÍ TU PANTALLA
+                MaterialPageRoute(
+                  builder: (context) => const HomeScreen(),
+                ), // <-- PON AQUÍ TU PANTALLA
               );
             }
           },
