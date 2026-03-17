@@ -22,6 +22,7 @@ class CreateFlashcardScreen extends StatefulWidget {
 class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   // Llave maestra del formulario
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   // Controladores de texto
   final TextEditingController _tituloController = TextEditingController();
@@ -104,6 +105,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   }
 
   /// Función que envía el prompt a la IA de Google Gemini
+  /// Función que envía el prompt a la IA de Google Gemini
   Future<void> _generarConIA() async {
     final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
@@ -114,11 +116,10 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
     final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
     final cantidad = _numTarjetasController.text;
-    String contexto = "";
 
     List<Part> partesPrompt = [];
 
-    // 2. ¡El Súper Prompt!
+    // 1. ¡El Súper Prompt!
     final promptInstrucciones =
         '''
       Eres un experto en crear material de estudio efectivo. Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el contenido que te proporciono.
@@ -135,6 +136,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       ]
     ''';
 
+    // 2. Preparamos el contenido según lo que haya elegido el usuario
     if (_metodoSeleccionado == MetodoEntrada.texto) {
       if (_apuntesController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -154,7 +156,9 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       if (_archivoSeleccionado == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Selecciona un archivo con formato PDF o TXT primero."),
+            content: Text(
+              "Selecciona un archivo con formato PDF o TXT primero.",
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -173,16 +177,66 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         partesPrompt.add(DataPart('text/plain', bytesDelArchivo));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Por ahora, la IA solo admite archivos PDF o TXT.'), backgroundColor: Colors.orange),
+          const SnackBar(
+            content: Text('Por ahora, la IA solo admite archivos PDF o TXT.'),
+            backgroundColor: Colors.orange,
+          ),
         );
         return;
       }
-      
     } else if (_metodoSeleccionado == MetodoEntrada.imagen) {
-      print("Aún tenemos que programar cómo enviarle la foto a Gemini.");
-      return;
+      if (_imagenSeleccionada == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Toma una foto de tus apuntes primero."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Añadimos las instrucciones al paquete
+      partesPrompt.add(TextPart(promptInstrucciones));
+
+      // ¡LA MAGIA DE LA VISIÓN! Convertimos la foto a formato binario
+      final bytesDeImagen = await _imagenSeleccionada!.readAsBytes();
+
+      // Averiguamos el formato de la imagen (jpeg, png...)
+      final ruta = _imagenSeleccionada!.path.toLowerCase();
+      String tipoMime =
+          'image/jpeg'; // Por defecto casi todas las cámaras usan jpeg/jpg
+      if (ruta.endsWith('.png')) {
+        tipoMime = 'image/png';
+      } else if (ruta.endsWith('.webp')) {
+        tipoMime = 'image/webp';
+      } else if (ruta.endsWith('.heic')) {
+        tipoMime = 'image/heic'; // Formato típico de los iPhone
+      }
+
+      // Adjuntamos la foto al mensaje para Gemini
+      partesPrompt.add(DataPart(tipoMime, bytesDeImagen));
     }
 
+// 3. Comprobamos la conexión a Internet ANTES de enviar nada
+    try {
+      final resultado = await InternetAddress.lookup('google.com');
+      if (resultado.isEmpty || resultado[0].rawAddress.isEmpty) {
+        throw const SocketException('Sin internet');
+      }
+    } on SocketException catch (_) {
+      // Si falla la prueba de internet, avisamos y cortamos la función
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No tienes conexión a internet. Revisa tu Wi-Fi o datos móviles.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return; // El return hace que no se ejecute nada del código de abajo
+    }
+
+    // 4. Enviamos el paquete a Gemini (Si hemos llegado aquí, es que HAY internet)
     try {
       print("Enviando datos a Gemini...");
       
@@ -195,22 +249,27 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         ),
       );
 
-      // Usamos Content.multi para poder enviarle Texto + Archivo a la vez
+      // Usamos Content.multi para poder enviarle Texto + Archivo/Imagen a la vez
       final response = await model.generateContent([
         Content.multi(partesPrompt)
       ]);
       
+      // ... resto de tu código igual (print, _guardarRepuestaBbdd, etc.)
       print("¡Gemini ha respondido!");
       log("Respuesta en crudo: ${response.text}");
 
-      // Guardamos en Firebase (tu función que ya funciona perfecta)
-      _guardarRepuestaBbdd(response.text ?? '');
-      
+      // Guardamos en Firebase
+      if (mounted) {
+        _guardarRepuestaBbdd(response.text ?? '');
+      }
     } catch (e) {
       print("Error al hablar con Gemini: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error con la IA: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error con la IA: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -440,24 +499,34 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               const SizedBox(height: 40),
 
               // --- BOTÓN FINAL ---
-              FilledButton.icon(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _generarConIA();
-                  }
-                },
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 24,
-                  ),
-                ),
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text(
-                  'Generar Flashcards',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : FilledButton.icon(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          setState(() {
+                            _isLoading = true; // Empieza a cargar
+                          });
+                          _generarConIA().whenComplete(() {
+                            setState(() {
+                              _isLoading =
+                                  false; // Termina de cargar pase lo que pase
+                            });
+                          });
+                        }
+                      },
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 24,
+                        ),
+                      ),
+                      icon: const Icon(Icons.auto_awesome),
+                      label: const Text(
+                        'Generar Flashcards',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
             ],
           ),
         ),
@@ -556,9 +625,25 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           .trim();
 
       print("Procesando las tarjetas...");
-      List<dynamic> tarjetasGeneradas = jsonDecode(jsonLimpio);
+      List<dynamic> tarjetasGeneradas = [];
 
-      // --- NUEVA LÓGICA DE CARPETA (Dropdown vs Input) ---
+      try {
+        tarjetasGeneradas = jsonDecode(jsonLimpio);
+      } catch (e) {
+        print("Error al decodificar el JSON de Gemini: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'La IA se ha confundido con el formato. Por favor, inténtalo de nuevo.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return; // Detenemos la función aquí para que no intente subir datos rotos
+      }
+
       String nombreCarpeta = "General";
 
       if (_creandoNuevaCarpeta && _almacenController.text.isNotEmpty) {
@@ -635,7 +720,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         }
       }
     } catch (e) {
-      print("❌ Error al guardar en Firebase: $e");
+      print("Error al guardar en Firebase: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

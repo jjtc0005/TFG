@@ -263,4 +263,62 @@ class HomeScreen extends StatelessWidget {
       }
     }
   }
+
+  // --- FUNCIÓN PARA BORRAR CARPETA Y SUS TARJETAS ---
+  
+  Future<void> _borrarCarpeta(BuildContext context, String carpetaId, String nombreCarpeta) async {
+    // 1. Mostramos un diálogo de confirmación (¡Buena práctica de UX!)
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Borrar mazo?'),
+        content: Text('¿Estás seguro de que quieres borrar "$nombreCarpeta"? Se perderán todas las tarjetas que contenga.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Borrar'),
+          ),
+        ],
+      ),
+    );
+
+    // Si el usuario cancela, no hacemos nada
+    if (confirmar != true) return;
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      final carpetaRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user?.uid)
+          .collection('Carpetas')
+          .doc(carpetaId);
+
+      // 2. Primero buscamos y borramos todas las flashcards que hay dentro
+      final flashcardsSnapshot = await carpetaRef.collection('Flashcards').get();
+      for (var doc in flashcardsSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // 3. Una vez vacía, borramos la carpeta
+      await carpetaRef.delete();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mazo borrado correctamente'), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      print("Error al borrar la carpeta: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al borrar el mazo'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 }
