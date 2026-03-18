@@ -96,7 +96,7 @@ class HomeScreen extends StatelessWidget {
 
                 // Si hay un error...
                 if (snapshot.hasError) {
-                  print("🔥 ERROR DE FIREBASE: ${snapshot.error}"); // Nos lo chivará en la consola
+                  print(" ERROR DE FIREBASE: ${snapshot.error}"); // Nos lo chivará en la consola
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),

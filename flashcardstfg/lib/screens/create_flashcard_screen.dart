@@ -198,26 +198,24 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       // Añadimos las instrucciones al paquete
       partesPrompt.add(TextPart(promptInstrucciones));
 
-      // ¡LA MAGIA DE LA VISIÓN! Convertimos la foto a formato binario
+      // Convertimos la foto a formato binario
       final bytesDeImagen = await _imagenSeleccionada!.readAsBytes();
 
       // Averiguamos el formato de la imagen (jpeg, png...)
       final ruta = _imagenSeleccionada!.path.toLowerCase();
-      String tipoMime =
-          'image/jpeg'; // Por defecto casi todas las cámaras usan jpeg/jpg
-      if (ruta.endsWith('.png')) {
-        tipoMime = 'image/png';
-      } else if (ruta.endsWith('.webp')) {
-        tipoMime = 'image/webp';
-      } else if (ruta.endsWith('.heic')) {
-        tipoMime = 'image/heic'; // Formato típico de los iPhone
-      }
+      String tipoMime = 'image/jpeg'; // Por defecto casi todas las cámaras usan jpeg/jpg
+      
+      if (ruta.endsWith('.png')) { tipoMime = 'image/png'; } 
+      
+      else if (ruta.endsWith('.webp')) { tipoMime = 'image/webp'; }
+      
+      else if (ruta.endsWith('.heic')) { tipoMime = 'image/heic';  } // Formato típico de los iPhone
 
       // Adjuntamos la foto al mensaje para Gemini
       partesPrompt.add(DataPart(tipoMime, bytesDeImagen));
     }
 
-// 3. Comprobamos la conexión a Internet ANTES de enviar nada
+    // 3. Comprobamos la conexión a Internet con un ping antes de enviar la petición a gemini
     try {
       final resultado = await InternetAddress.lookup('google.com');
       if (resultado.isEmpty || resultado[0].rawAddress.isEmpty) {
@@ -233,10 +231,10 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           ),
         );
       }
-      return; // El return hace que no se ejecute nada del código de abajo
+      return;
     }
 
-    // 4. Enviamos el paquete a Gemini (Si hemos llegado aquí, es que HAY internet)
+    // 4. Enviamos el paquete a Gemini ya conectados
     try {
       print("Enviando datos a Gemini...");
       
@@ -254,7 +252,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         Content.multi(partesPrompt)
       ]);
       
-      // ... resto de tu código igual (print, _guardarRepuestaBbdd, etc.)
       print("¡Gemini ha respondido!");
       log("Respuesta en crudo: ${response.text}");
 
@@ -698,7 +695,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('¡Flashcards creadas y guardadas con éxito! 🎉'),
+            content: Text('Flashcards creadas y guardadas con éxito'),
             backgroundColor: Colors.green,
           ),
         );
