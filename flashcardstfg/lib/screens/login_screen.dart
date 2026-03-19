@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// IMPORTANTE: Asegúrate de que estos nombres coinciden con tus archivos reales
 import '../services/auth_services.dart';
 import 'home_screen.dart';
 
@@ -27,7 +26,8 @@ class LoginScreen extends StatelessWidget {
 
             const SizedBox(height: 50),
 
-            // BOTÓN REAL CONECTADO
+            // Botón para entrar con Google
+
             ElevatedButton.icon(
               icon: const Icon(Icons.login),
               label: const Text('Entrar con Google'),
@@ -37,24 +37,22 @@ class LoginScreen extends StatelessWidget {
                   vertical: 15,
                 ),
               ),
-              // Aquí está la magia:
               onPressed: () async {
                 print("Botón pulsado. Iniciando login...");
 
-                // 1. Llamamos a tu servicio (que ya arreglamos)
+                // 1. Llamamos al servicio que inicia sesion con google
                 final userCredential = await AuthService().signInWithGoogle();
 
-                // 2. Comprobamos si salió bien
+                // 2. Comprobamos si el login se completó
                 if (userCredential != null) {
                   print("Login Éxito: ${userCredential.user?.displayName}");
 
-                  // 3. NAVEGACIÓN: Cambiamos de pantalla
-                  // El 'if (context.mounted)' es vital en Flutter moderno para evitar errores
-                  if (context.mounted) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
+                // 3. Cambiamos de pantalla una vez iniciada la sesión a la ventana principal 
+                if (context.mounted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
                       ),
                     );
                   }

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // <--- ESTE ARCHIVO YA EXISTE, NO DEBE DAR ERROR
+import 'firebase_options.dart';
 import 'screens/login_screen.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // Añade este import
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Aquí es donde usamos la configuración que acabas de descargar
+  // Inicializamos la sesión con la base de datos Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await dotenv.load(fileName: "./apiKey.env");
