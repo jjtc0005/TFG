@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flashcardstfg/screens/study_screen.dart'; // Importante para la navegación
 
-// --- PIEZA EXTRAÍDA: TARJETA DE CARPETA (DISEÑO MEJORADO) ---
 class CarpetaCard extends StatelessWidget {
   final String idCarpeta;
   final String nombreCarpeta;
-  // Definimos las dos funciones que necesitamos recibir desde el Home
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -13,8 +11,8 @@ class CarpetaCard extends StatelessWidget {
     super.key,
     required this.idCarpeta,
     required this.nombreCarpeta,
-    required this.onEdit,   // <--- Recibimos editar
-    required this.onDelete, // <--- Recibimos borrar
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override

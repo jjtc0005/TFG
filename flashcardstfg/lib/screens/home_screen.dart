@@ -5,8 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'create_flashcard_screen.dart';
 import 'login_screen.dart';
-import 'study_screen.dart';
-import 'package:flashcardstfg/widgets/header_saludo.dart';
 import 'package:flashcardstfg/widgets/carpeta_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -28,7 +26,6 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               showDialog(
                 context: context,
-                // CAMBIO CLAVE: Le llamamos 'dialogContext' para no confundirlo
                 builder: (BuildContext dialogContext) => AlertDialog( 
                   title: const Text('Cerrar Sesión'),
                   content: const Text('¿Seguro que quieres salir?'),
@@ -88,7 +85,6 @@ class HomeScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 
-                // --- EL TRUCO PARA EVITAR EL ERROR DE PERMISOS AL SALIR ---
                 if (snapshot.hasError) {
                   // Si el usuario ya es null (se está cerrando sesión), no mostramos el error feo rojo
                   if (FirebaseAuth.instance.currentUser == null) {
@@ -140,7 +136,7 @@ class HomeScreen extends StatelessWidget {
                       },
                       // Conectamos la señal de borrar
                       onDelete: () {
-                        _borrarCarpeta(context, carpeta.id, carpeta['Nombre'] ?? 'Sin nombre');
+                        _borrarCarpeta(context, carpeta.id, carpeta['Nombre'] ?? 'Sin nombre');   
                       },
                     );
                   },
