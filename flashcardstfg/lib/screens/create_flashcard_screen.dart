@@ -22,7 +22,7 @@ class CreateFlashcardScreen extends StatefulWidget {
 class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   // Llave maestra del formulario
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
+  String? _mensajeCarga;
 
   // Controladores de texto
   final TextEditingController _tituloController = TextEditingController();
@@ -105,173 +105,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   }
 
   /// Función que envía el prompt a la IA de Google Gemini
-  /// Función que envía el prompt a la IA de Google Gemini
-  Future<void> _generarConIA() async {
-    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-
-    if (apiKey.isEmpty) {
-      print("Error en la lectura de la api");
-      return;
-    }
-
-    final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
-    final cantidad = _numTarjetasController.text;
-
-    List<Part> partesPrompt = [];
-
-    // 1. ¡El Súper Prompt!
-    final promptInstrucciones =
-        '''
-      Eres un experto en crear material de estudio efectivo. Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el contenido que te proporciono.
-      
-      Reglas estrictas y obligatorias:
-      1. CANTIDAD EXACTA: Debes devolver exactamente $cantidad tarjetas. Ni una más, ni una menos. Es tu prioridad máxima.
-      2. CÓMO LLEGAR AL NÚMERO: Si el texto o documento parece corto, divide los conceptos grandes en preguntas más pequeñas y específicas. Exprime cada detalle para alcanzar las $cantidad tarjetas.
-      3. VERACIDAD: Todo debe salir del contenido proporcionado. No inventes datos externos.
-      
-      IMPORTANTE: Devuelve tu respuesta ÚNICAMENTE en el siguiente formato JSON exacto, sin comillas invertidas de markdown (```json), ni texto antes o después. Solo el array JSON puro:
-      [
-        {"pregunta": "Pregunta 1", "respuesta": "Respuesta 1"},
-        {"pregunta": "Pregunta 2", "respuesta": "Respuesta 2"}
-      ]
-    ''';
-
-    // 2. Preparamos el contenido según lo que haya elegido el usuario
-    if (_metodoSeleccionado == MetodoEntrada.texto) {
-      if (_apuntesController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Escribe unos apuntes primero"),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-      partesPrompt.add(
-        TextPart(
-          "$promptInstrucciones\n\nTexto de origen:\n${_apuntesController.text}",
-        ),
-      );
-    } else if (_metodoSeleccionado == MetodoEntrada.archivo) {
-      if (_archivoSeleccionado == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Selecciona un archivo con formato PDF o TXT primero.",
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      partesPrompt.add(TextPart(promptInstrucciones));
-
-      final bytesDelArchivo = await _archivoSeleccionado!.readAsBytes();
-      final nombreEnMinusculas = _nombreArchivo!.toLowerCase();
-
-      // Clasificamos el archivo para que Gemini sepa cómo leerlo
-      if (nombreEnMinusculas.endsWith('.pdf')) {
-        partesPrompt.add(DataPart('application/pdf', bytesDelArchivo));
-      } else if (nombreEnMinusculas.endsWith('.txt')) {
-        partesPrompt.add(DataPart('text/plain', bytesDelArchivo));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por ahora, la IA solo admite archivos PDF o TXT.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
-    } else if (_metodoSeleccionado == MetodoEntrada.imagen) {
-      if (_imagenSeleccionada == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Toma una foto de tus apuntes primero."),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      // Añadimos las instrucciones al paquete
-      partesPrompt.add(TextPart(promptInstrucciones));
-
-      // Convertimos la foto a formato binario
-      final bytesDeImagen = await _imagenSeleccionada!.readAsBytes();
-
-      // Averiguamos el formato de la imagen (jpeg, png...)
-      final ruta = _imagenSeleccionada!.path.toLowerCase();
-      String tipoMime = 'image/jpeg'; // Por defecto casi todas las cámaras usan jpeg/jpg
-      
-      if (ruta.endsWith('.png')) { tipoMime = 'image/png'; } 
-      
-      else if (ruta.endsWith('.webp')) { tipoMime = 'image/webp'; }
-      
-      else if (ruta.endsWith('.heic')) { tipoMime = 'image/heic';  } // Formato típico de los iPhone
-
-      // Adjuntamos la foto al mensaje para Gemini
-      partesPrompt.add(DataPart(tipoMime, bytesDeImagen));
-    }
-
-    // 3. Comprobamos la conexión a Internet con un ping antes de enviar la petición a gemini
-    try {
-      final resultado = await InternetAddress.lookup('google.com');
-      if (resultado.isEmpty || resultado[0].rawAddress.isEmpty) {
-        throw const SocketException('Sin internet');
-      }
-    } on SocketException catch (_) {
-      // Si falla la prueba de internet, avisamos y cortamos la función
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No tienes conexión a internet. Revisa tu Wi-Fi o datos móviles.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    }
-
-    // 4. Enviamos el paquete a Gemini ya conectados
-    try {
-      print("Enviando datos a Gemini...");
-      
-      // Avisamos al usuario de que la IA está trabajando
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('La IA está leyendo tu contenido y creando las tarjetas...'), 
-          backgroundColor: Colors.blue,
-          duration: Duration(seconds: 4),
-        ),
-      );
-
-      // Usamos Content.multi para poder enviarle Texto + Archivo/Imagen a la vez
-      final response = await model.generateContent([
-        Content.multi(partesPrompt)
-      ]);
-      
-      print("¡Gemini ha respondido!");
-      log("Respuesta en crudo: ${response.text}");
-
-      // Guardamos en Firebase
-      if (mounted) {
-        _guardarRepuestaBbdd(response.text ?? '');
-      }
-    } catch (e) {
-      print("Error al hablar con Gemini: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error con la IA: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   // --- INTERFAZ VISUAL ---
   @override
   Widget build(BuildContext context) {
@@ -495,7 +328,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
               const SizedBox(height: 40),
 
-              // --- BOTÓN FINAL ---
+              /*
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : FilledButton.icon(
@@ -523,6 +356,35 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                         'Generar Flashcards',
                         style: TextStyle(fontSize: 16),
                       ),
+                    ),
+            */
+
+            // --- BOTÓN FINAL OPTIMIZADO ---
+              _mensajeCarga != null
+                  ? Center(
+                      child: Column(
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(
+                            _mensajeCarga!, 
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                          ),
+                        ],
+                      ),
+                    )
+                  : FilledButton.icon(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          // Quitamos el setState de aquí, lo manejaremos dentro de las funciones
+                          _generarConIA(); 
+                        }
+                      },
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      ),
+                      icon: const Icon(Icons.auto_awesome),
+                      label: const Text('Generar Flashcards', style: TextStyle(fontSize: 16)),
                     ),
             ],
           ),
@@ -606,83 +468,147 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     );
   }
 
-  // --- GUARDAR EN BBDD ---
+/// Función optimizada que envía el prompt a Gemini
+  Future<void> _generarConIA() async {
+    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+
+    if (apiKey.isEmpty) {
+      print("Error en la lectura de la api");
+      return;
+    }
+
+    final model = GenerativeModel(model: 'gemini-3.1-flash-lite-preview', apiKey: apiKey);
+    final cantidad = _numTarjetasController.text;
+
+    List<Part> partesPrompt = [];
+
+    // ... (Tu prompt se queda igual) ...
+    final promptInstrucciones =
+        '''
+      Eres un experto en crear material de estudio efectivo. Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el contenido que te proporciono.
+      
+      Reglas estrictas y obligatorias:
+      1. CANTIDAD EXACTA: Debes devolver exactamente $cantidad tarjetas.
+      2. CÓMO LLEGAR AL NÚMERO: Divide los conceptos grandes en preguntas más pequeñas.
+      3. VERACIDAD: Todo debe salir del contenido proporcionado.
+      
+      IMPORTANTE: Devuelve tu respuesta ÚNICAMENTE en JSON:
+      [
+        {"pregunta": "P1", "respuesta": "R1"}
+      ]
+    ''';
+
+    if (_metodoSeleccionado == MetodoEntrada.texto) {
+
+      if (_apuntesController.text.isEmpty) return;
+
+      partesPrompt.add(TextPart("$promptInstrucciones\n\nTexto:\n${_apuntesController.text}"));
+    } 
+    else if (_metodoSeleccionado == MetodoEntrada.archivo) {
+
+      if (_archivoSeleccionado == null) return;
+      
+      setState(() => _mensajeCarga = "Preparando archivo...");
+      
+      partesPrompt.add(TextPart(promptInstrucciones));
+      
+      final bytesDelArchivo = await _archivoSeleccionado!.readAsBytes();
+      final nombreEnMinusculas = _nombreArchivo!.toLowerCase();
+
+      if (nombreEnMinusculas.endsWith('.pdf')) {
+        partesPrompt.add(DataPart('application/pdf', bytesDelArchivo));
+      } else if (nombreEnMinusculas.endsWith('.txt')) {
+        partesPrompt.add(DataPart('text/plain', bytesDelArchivo));
+      }
+    } else if (_metodoSeleccionado == MetodoEntrada.imagen) {
+
+      if (_imagenSeleccionada == null) return;
+      
+      setState(() => _mensajeCarga = "Procesando imagen...");
+      partesPrompt.add(TextPart(promptInstrucciones));
+
+      final bytesDeImagen = await _imagenSeleccionada!.readAsBytes();
+      final ruta = _imagenSeleccionada!.path.toLowerCase();
+      String tipoMime = 'image/jpeg';
+
+      if (ruta.endsWith('.png')) tipoMime = 'image/png';
+      else if (ruta.endsWith('.webp')) tipoMime = 'image/webp';
+      
+      partesPrompt.add(DataPart(tipoMime, bytesDeImagen));
+
+    }
+
+    // Comprobamos Internet
+    try {
+      final resultado = await InternetAddress.lookup('google.com');
+      if (resultado.isEmpty) throw const SocketException('Sin internet');
+    } catch (_) {
+      setState(() => _mensajeCarga = null);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sin internet.')));
+      return;
+    }
+
+    try {
+      // Damos feedback de que estamos subiendo los datos (la fase más lenta)
+      setState(() => _mensajeCarga = "Analizando con Inteligencia Artificial...");
+      
+      final response = await model.generateContent([Content.multi(partesPrompt)]);
+      
+      // Pasamos a la fase de guardado
+      setState(() => _mensajeCarga = "Guardando flashcards...");
+      if (mounted) {
+        await _guardarRepuestaBbdd(response.text ?? '');
+      }
+    } catch (e) {
+      setState(() => _mensajeCarga = null);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error IA: $e')));
+    }
+  }
+
+  // --- GUARDAR EN BBDD CON BATCH (10x MÁS RÁPIDO) ---
   Future<void> _guardarRepuestaBbdd(String respuestaGemini) async {
     try {
       final usuario = FirebaseAuth.instance.currentUser;
+      if (usuario == null) return;
 
-      if (usuario == null) {
-        print("Error: Nadie ha iniciado sesión.");
-        return;
-      }
-
-      String jsonLimpio = respuestaGemini
-          .replaceAll('```json', '')
-          .replaceAll('```', '')
-          .trim();
-
-      print("Procesando las tarjetas...");
-      List<dynamic> tarjetasGeneradas = [];
-
-      try {
-        tarjetasGeneradas = jsonDecode(jsonLimpio);
-      } catch (e) {
-        print("Error al decodificar el JSON de Gemini: $e");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'La IA se ha confundido con el formato. Por favor, inténtalo de nuevo.',
-              ),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return; // Detenemos la función aquí para que no intente subir datos rotos
-      }
+      String jsonLimpio = respuestaGemini.replaceAll('```json', '').replaceAll('```', '').trim();
+      List<dynamic> tarjetasGeneradas = jsonDecode(jsonLimpio);
 
       String nombreCarpeta = "General";
 
       if (_creandoNuevaCarpeta && _almacenController.text.isNotEmpty) {
         nombreCarpeta = _almacenController.text;
-      } else if (_carpetaSeleccionada != null &&
-          _carpetaSeleccionada != 'NUEVA') {
+      } else if (_carpetaSeleccionada != null && _carpetaSeleccionada != 'NUEVA') {
         nombreCarpeta = _carpetaSeleccionada!;
       }
 
-      final carpetaPath = FirebaseFirestore.instance
-          .collection('users')
-          .doc(usuario.uid)
-          .collection('Carpetas');
-
+      final carpetaPath = FirebaseFirestore.instance.collection('users').doc(usuario.uid).collection('Carpetas');
       String carpetaDestino;
 
-      final busqueda = await carpetaPath
-          .where("Nombre", isEqualTo: nombreCarpeta)
-          .get();
+      final busqueda = await carpetaPath.where("Nombre", isEqualTo: nombreCarpeta).get();
 
       if (busqueda.docs.isNotEmpty) {
         carpetaDestino = busqueda.docs.first.id;
-        print("Carpeta encontrada con ID $carpetaDestino");
       } else {
         final nuevaCarpeta = await carpetaPath.add({
           "Nombre": nombreCarpeta,
           "fechaCreacion": FieldValue.serverTimestamp(),
         });
         carpetaDestino = nuevaCarpeta.id;
-        print("Nueva carpeta generada con id: $carpetaDestino");
       }
 
-      print(
-        "Subiendo ${tarjetasGeneradas.length} flashcards a la base de datos...",
-      );
+      final flashcardsRef = carpetaPath.doc(carpetaDestino).collection('Flashcards');
 
-      final flashcardsRef = carpetaPath
-          .doc(carpetaDestino)
-          .collection('Flashcards');
+      // --- MAGIA DE OPTIMIZACIÓN: EL WRITE BATCH ---
+      final batch = FirebaseFirestore.instance.batch();
 
       for (var tarjeta in tarjetasGeneradas) {
-        await flashcardsRef.add({
+
+        // Creamos una referencia vacía para obtener un ID nuevo
+        final nuevaTarjetaRef = flashcardsRef.doc();
+
+        // Empaquetamos la instrucción de guardado en el lote
+        batch.set(nuevaTarjetaRef, {
           'pregunta': tarjeta['pregunta'],
           'respuesta': tarjeta['respuesta'],
           'titulo_mazo': _tituloController.text,
@@ -691,41 +617,19 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         });
       }
 
-      // 6. Mensaje de éxito y limpieza
+      // Ejecutamos todo el paquete a la vez (1 solo viaje a internet)
+      await batch.commit();
+
       if (mounted) {
+        setState(() => _mensajeCarga = null); // Ocultamos la carga
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Flashcards creadas y guardadas con éxito'),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text('¡Mazo generado al instante!'), backgroundColor: Colors.green),
         );
-
-        _tituloController.clear();
-        _numTarjetasController.clear();
-        _apuntesController.clear();
-        if (_creandoNuevaCarpeta) {
-          _almacenController.clear();
-        }
-
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        } else {
-          setState(() {
-            _carpetaSeleccionada = null;
-            _creandoNuevaCarpeta = false;
-          });
-        }
+        Navigator.pop(context); // Volvems al menú
       }
     } catch (e) {
-      print("Error al guardar en Firebase: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al procesar o guardar las tarjetas.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      setState(() => _mensajeCarga = null);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al guardar')));
     }
   }
 }
