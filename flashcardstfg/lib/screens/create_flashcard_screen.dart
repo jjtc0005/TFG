@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'dart:developer';
+import 'package:flashcardstfg/widgets/selector_carpeta.dart';
 
 enum MetodoEntrada { texto, imagen, archivo }
 
@@ -161,88 +161,16 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               ),
               const SizedBox(height: 16),
 
-              // --- SELECTOR DE CARPETAS CON FIREBASE ---
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(FirebaseAuth.instance.currentUser?.uid)
-                    .collection('Carpetas')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  List<DropdownMenuItem<String>> opciones = [];
-
-                  // Añadimos las carpetas existentes
-                  for (var doc in snapshot.data!.docs) {
-                    String nombre = doc['Nombre'] ?? 'Sin nombre';
-                    opciones.add(
-                      DropdownMenuItem(value: nombre, child: Text(nombre)),
-                    );
-                  }
-
-                  // Añadimos la opción de crear una nueva
-                  opciones.add(
-                    const DropdownMenuItem(
-                      value: 'NUEVA',
-                      child: Text(
-                        '➕ Crear nueva carpeta...',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                  );
-
-                  return Column(
-                    children: [
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Selecciona una Carpeta',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.folder),
-                        ),
-                        items: opciones,
-                        value:
-                            opciones.any(
-                              (item) => item.value == _carpetaSeleccionada,
-                            )
-                            ? _carpetaSeleccionada
-                            : null,
-                        onChanged: (String? nuevoValor) {
-                          setState(() {
-                            _carpetaSeleccionada = nuevoValor;
-                            _creandoNuevaCarpeta = (nuevoValor == 'NUEVA');
-                          });
-                        },
-                        validator: (value) =>
-                            value == null ? 'Selecciona una carpeta' : null,
-                      ),
-
-                      // Si elige crear nueva, mostramos el campo de texto
-                      if (_creandoNuevaCarpeta) ...[
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _almacenController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nombre de la nueva carpeta',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.create_new_folder),
-                          ),
-                          validator: (value) {
-                            if (_creandoNuevaCarpeta &&
-                                (value == null || value.isEmpty)) {
-                              return 'Escribe el nombre de la carpeta';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ],
-                  );
+              // Selector de la carpeta extraido a widget
+              SelectorCarpeta(
+                carpetaSeleccionada: _carpetaSeleccionada,
+                creandoNuevaCarpeta: _creandoNuevaCarpeta,
+                almacenController: _almacenController,
+                onChanged: (nuevoValor, esNueva) {
+                  setState(() {
+                    _carpetaSeleccionada = nuevoValor;
+                    _creandoNuevaCarpeta = esNueva;
+                  });
                 },
               ),
               const SizedBox(height: 16),
@@ -357,81 +285,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // --- WIDGETS DE APOYO VISUAL ---
-  Widget _crearBotonSubida(IconData icono, String texto, VoidCallback accion) {
-    return InkWell(
-      onTap: accion,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        height: 150,
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.1),
-          border: Border.all(color: Colors.grey, style: BorderStyle.solid),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icono, size: 40, color: Colors.blueGrey),
-              const SizedBox(height: 8),
-              Text(texto, style: const TextStyle(color: Colors.blueGrey)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _mostrarMiniaturaFoto() {
-    return Stack(
-      alignment: Alignment.topRight,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.file(
-            _imagenSeleccionada!,
-            height: 200,
-            width: double.infinity,
-            fit: BoxFit.cover,
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.cancel, color: Colors.red, size: 30),
-          onPressed: _borrarFoto,
-        ),
-      ],
-    );
-  }
-
-  Widget _mostrarArchivoSeleccionado() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        border: Border.all(color: Colors.blueAccent),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.description, color: Colors.blueAccent, size: 40),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              _nombreArchivo ?? 'Archivo seleccionado',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: _borrarArchivo,
-          ),
-        ],
       ),
     );
   }
@@ -603,4 +456,81 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al guardar')));
     }
   }
+
+  // --- WIDGETS DE APOYO VISUAL ---
+  Widget _crearBotonSubida(IconData icono, String texto, VoidCallback accion) {
+    return InkWell(
+      onTap: accion,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 150,
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.1),
+          border: Border.all(color: Colors.grey, style: BorderStyle.solid),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icono, size: 40, color: Colors.blueGrey),
+              const SizedBox(height: 8),
+              Text(texto, style: const TextStyle(color: Colors.blueGrey)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _mostrarMiniaturaFoto() {
+    return Stack(
+      alignment: Alignment.topRight,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.file(
+            _imagenSeleccionada!,
+            height: 200,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.cancel, color: Colors.red, size: 30),
+          onPressed: _borrarFoto,
+        ),
+      ],
+    );
+  }
+
+  Widget _mostrarArchivoSeleccionado() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        border: Border.all(color: Colors.blueAccent),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.description, color: Colors.blueAccent, size: 40),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              _nombreArchivo ?? 'Archivo seleccionado',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: _borrarArchivo,
+          ),
+        ],
+      ),
+    );
+  }
+
+
 }

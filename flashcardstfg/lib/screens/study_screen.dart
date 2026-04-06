@@ -2,8 +2,6 @@ import 'package:flashcardstfg/screens/flashcard_animada.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math';
-
 
 // PANTALLA 1: MUESTRA LOS MAZOS DENTRO DE LA CARPETA (LISTA)
 class StudyScreen extends StatelessWidget {

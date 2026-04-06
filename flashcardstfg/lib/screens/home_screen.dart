@@ -18,38 +18,11 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Mis Apuntes'),
         centerTitle: true,
-        // Tu botón de salir a la izquierda con aviso
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar Sesión',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext dialogContext) => AlertDialog( 
-                  title: const Text('Cerrar Sesión'),
-                  content: const Text('¿Seguro que quieres salir?'),
-                  actions: [
-                    TextButton(
-                      // Usamos dialogContext para cerrar la ventana
-                      onPressed: () => Navigator.pop(dialogContext), 
-                      child: const Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        // 1. Cerramos la ventana emergente
-                        Navigator.pop(dialogContext); 
-                        
-                        // 2. Viajamos al Login usando el 'context' ORIGINAL de la HomeScreen
-                        _cerrarSesion(context); 
-                      },
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      child: const Text('Sí, salir'),
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: () => _mostrarDialogoCerrarSesion(context), // Cambiado a función externa
           ),
         ],
       ),
@@ -323,4 +296,30 @@ class HomeScreen extends StatelessWidget {
       );
     }
   }
+
+  // --- FUNCIÓN EXTRAÍDA: Diálogo de cerrar sesión ---
+  void _mostrarDialogoCerrarSesion(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog( 
+        title: const Text('Cerrar Sesión'),
+        content: const Text('¿Seguro que quieres salir?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext), 
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); 
+              _cerrarSesion(context); 
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Sí, salir'),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
