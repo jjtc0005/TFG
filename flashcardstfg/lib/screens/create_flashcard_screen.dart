@@ -116,17 +116,17 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // 1. Intentamos volver de forma natural (funciona si usaste Navigator.push)
+
+            // 1. Intentamos volver de forma natural
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             } else {
               // 2. Si no hay historial, forzamos la navegación al Home
-              // IMPORTANTE: Cambia "HomeScreen()" por el nombre real de tu pantalla principal
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const HomeScreen(),
-                ), // <-- PON AQUÍ TU PANTALLA
+                ),
               );
             }
           },
@@ -328,38 +328,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
               const SizedBox(height: 40),
 
-              /*
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : FilledButton.icon(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          setState(() {
-                            _isLoading = true; // Empieza a cargar
-                          });
-                          _generarConIA().whenComplete(() {
-                            setState(() {
-                              _isLoading =
-                                  false; // Termina de cargar pase lo que pase
-                            });
-                          });
-                        }
-                      },
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 24,
-                        ),
-                      ),
-                      icon: const Icon(Icons.auto_awesome),
-                      label: const Text(
-                        'Generar Flashcards',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-            */
-
-            // --- BOTÓN FINAL OPTIMIZADO ---
+            // Botón final
               _mensajeCarga != null
                   ? Center(
                       child: Column(
@@ -376,7 +345,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                   : FilledButton.icon(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          // Quitamos el setState de aquí, lo manejaremos dentro de las funciones
                           _generarConIA(); 
                         }
                       },
@@ -565,7 +533,10 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     }
   }
 
-  // --- GUARDAR EN BBDD CON BATCH (10x MÁS RÁPIDO) ---
+  /// Permite guardar en la base de datos la respuesta de la IA con las 
+  /// flashcards en batch creando una instancia vacía que podemos rellenar y volver
+  /// a actualizar, esto optimiza la versión anterior que creaba en memoria una
+  /// tarjeta y la rellenaba de una en una
   Future<void> _guardarRepuestaBbdd(String respuestaGemini) async {
     try {
       final usuario = FirebaseAuth.instance.currentUser;
@@ -599,7 +570,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
       final flashcardsRef = carpetaPath.doc(carpetaDestino).collection('Flashcards');
 
-      // --- MAGIA DE OPTIMIZACIÓN: EL WRITE BATCH ---
+      // Creación del batch
       final batch = FirebaseFirestore.instance.batch();
 
       for (var tarjeta in tarjetasGeneradas) {
