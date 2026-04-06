@@ -421,28 +421,34 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         carpetaDestino = nuevaCarpeta.id;
       }
 
-      final flashcardsRef = carpetaPath.doc(carpetaDestino).collection('Flashcards');
-
-      // Creación del batch
+      // --- NUEVA ESTRUCTURA DE BASE DE DATOS OPTIMIZADA ---
+      
+      // 1. Creamos la referencia al nuevo Mazo (Catálogo)
+      final mazoRef = carpetaPath.doc(carpetaDestino).collection('Mazos').doc();
+      
       final batch = FirebaseFirestore.instance.batch();
 
+      // 2. Guardamos los datos principales del Mazo
+      batch.set(mazoRef, {
+        'titulo': _tituloController.text,
+        'cantidad_tarjetas': tarjetasGeneradas.length,
+        'fechaCreacion': FieldValue.serverTimestamp(),
+      });
+
+      // 3. La subcolección de flashcards ahora va DENTRO de ese mazo
+      final flashcardsRef = mazoRef.collection('Flashcards');
+
       for (var tarjeta in tarjetasGeneradas) {
-
-        // Creamos una referencia vacía para obtener un ID nuevo
-        final nuevaTarjetaRef = flashcardsRef.doc();
-
-        // Empaquetamos la instrucción de guardado en el lote
+        final nuevaTarjetaRef = flashcardsRef.doc(); 
         batch.set(nuevaTarjetaRef, {
           'pregunta': tarjeta['pregunta'],
           'respuesta': tarjeta['respuesta'],
-          'titulo_mazo': _tituloController.text,
           'fechaCreacion': FieldValue.serverTimestamp(),
           'nivel': 0,
         });
       }
 
-      // Ejecutamos todo el paquete a la vez (1 solo viaje a internet)
-      await batch.commit();
+      await batch.commit(); // Subimos el Mazo y todas sus tarjetas de golpe
 
       if (mounted) {
         setState(() => _mensajeCarga = null); // Ocultamos la carga

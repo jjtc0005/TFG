@@ -1,9 +1,11 @@
-import 'package:flashcardstfg/screens/flashcard_animada.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcardstfg/screens/flashcard_animada.dart'; // Asegúrate de que esta ruta es correcta
 
-// PANTALLA 1: MUESTRA LOS MAZOS DENTRO DE LA CARPETA (LISTA)
+// =========================================================================
+// PANTALLA 1: MUESTRA LOS MAZOS DENTRO DE LA CARPETA (EL CATÁLOGO)
+// =========================================================================
 class StudyScreen extends StatelessWidget {
   final String carpetaId;
   final String nombreCarpeta;
@@ -21,12 +23,13 @@ class StudyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(nombreCarpeta), centerTitle: true),
       body: StreamBuilder<QuerySnapshot>(
+        // AHORA APUNTAMOS A LA COLECCIÓN "Mazos" (Súper rápido y barato)
         stream: FirebaseFirestore.instance
             .collection('users')
             .doc(uid)
             .collection('Carpetas')
             .doc(carpetaId)
-            .collection('Flashcards')
+            .collection('Mazos')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -36,37 +39,26 @@ class StudyScreen extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
               child: Text(
-                'Esta carpeta está vacía.\n¡Crea algunas flashcards!',
+                'Esta carpeta está vacía.\n¡Crea algunos mazos!',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
             );
           }
 
-          // Extraemos los "titulo_mazo" únicos
-          Set<String> titulosUnicos = {};
-          for (var doc in snapshot.data!.docs) {
-            final data = doc.data() as Map<String, dynamic>;
-            final titulo = data['titulo_mazo'] ?? 'Sin título';
-            titulosUnicos.add(titulo);
-          }
-
-          List<String> listaMazos = titulosUnicos.toList();
+          final listaMazos = snapshot.data!.docs;
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: listaMazos.length,
             itemBuilder: (context, index) {
-              final tituloMazo = listaMazos[index];
+              final docMazo = listaMazos[index];
+              final data = docMazo.data() as Map<String, dynamic>;
 
-              // Calculamos cuántas tarjetas tiene este mazo exacto
-              final int cantidadTarjetas = snapshot.data!.docs
-                  .where(
-                    (doc) =>
-                        (doc.data() as Map<String, dynamic>)['titulo_mazo'] ==
-                        tituloMazo,
-                  )
-                  .length;
+              final tituloMazo = data['titulo'] ?? 'Sin título';
+              final cantidadTarjetas = data['cantidad_tarjetas'] ?? 0;
+              final mazoId = docMazo
+                  .id; // Necesitamos este ID para luego buscar sus tarjetas
 
               return Card(
                 elevation: 3,
@@ -105,6 +97,7 @@ class StudyScreen extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => MazoStudyScreen(
                           carpetaId: carpetaId,
+                          mazoId: mazoId,
                           tituloMazo: tituloMazo,
                         ),
                       ),
@@ -120,15 +113,18 @@ class StudyScreen extends StatelessWidget {
   }
 }
 
+// =========================================================================
 // PANTALLA 2: MODO ESTUDIO (CARRUSEL ANIMADO)
-
+// =========================================================================
 class MazoStudyScreen extends StatefulWidget {
   final String carpetaId;
+  final String mazoId; // AÑADIMOS EL ID DEL MAZO
   final String tituloMazo;
 
   const MazoStudyScreen({
     super.key,
     required this.carpetaId,
+    required this.mazoId,
     required this.tituloMazo,
   });
 
@@ -138,30 +134,29 @@ class MazoStudyScreen extends StatefulWidget {
 
 class _MazoStudyScreenState extends State<MazoStudyScreen> {
   final PageController _pageController = PageController();
-
-  // OPTIMIZACIÓN 1: El ValueNotifier que guarda el número de tarjeta
   final ValueNotifier<int> _tarjetaActual = ValueNotifier<int>(1);
-
   late Stream<QuerySnapshot> _streamTarjetas;
 
   @override
   void initState() {
     super.initState();
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    // AHORA BUSCAMOS LAS TARJETAS DENTRO DEL MAZO ESPECÍFICO
     _streamTarjetas = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .collection('Carpetas')
         .doc(widget.carpetaId)
+        .collection('Mazos')
+        .doc(widget.mazoId)
         .collection('Flashcards')
-        .where('titulo_mazo', isEqualTo: widget.tituloMazo)
         .snapshots();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _tarjetaActual.dispose(); // Limpiamos la memoria
+    _tarjetaActual.dispose();
     super.dispose();
   }
 
@@ -189,7 +184,6 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
 
           return Column(
             children: [
-              // OPTIMIZACIÓN 2: Solo este pequeño trozo de texto se actualiza al deslizar
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: ValueListenableBuilder<int>(
@@ -207,12 +201,10 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
                 ),
               ),
 
-              // El Carrusel principal
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
                   onPageChanged: (index) {
-                    // OPTIMIZACIÓN 3: Cambiamos el valor en silencio, sin hacer setState()
                     _tarjetaActual.value = index + 1;
                   },
                   itemCount: flashcards.length,
