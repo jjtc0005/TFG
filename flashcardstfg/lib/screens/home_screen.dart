@@ -223,13 +223,14 @@ class HomeScreen extends StatelessWidget {
     }
   }
  // --- FUNCIÓN PARA BORRAR CARPETA Y SUS TARJETAS ---
+// --- FUNCIÓN PARA BORRAR CARPETA, MAZOS Y TARJETAS ---
   Future<void> _borrarCarpeta(BuildContext context, String carpetaId, String nombreCarpeta) async {
     // 1. Diálogo de confirmación
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('¿Borrar mazo de flashcards?'),
-        content: const Text('Se perderán todas las tarjetas que contenga permanentemente y no podrás recuperarlas.'),
+        title: const Text('¿Borrar esta carpeta?'),
+        content: const Text('Se perderán todos los mazos y tarjetas que contenga permanentemente. Esta acción no se puede deshacer.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -238,7 +239,7 @@ class HomeScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Sí, borrar'),
+            child: const Text('Sí, borrar TODO'),
           ),
         ],
       ),
@@ -246,26 +247,18 @@ class HomeScreen extends StatelessWidget {
 
     if (confirmar != true) return;
 
-    // --- EL TRUCO MAESTRO ---
-    // Guardamos el "controlador de pantallas" y el "controlador de mensajes" 
-    // antes de que la tarjeta se borre de Firebase y muera su context.
     final navegador = Navigator.of(context);
     final mensajes = ScaffoldMessenger.of(context);
 
-    // Mostramos la pantalla de carga
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return const Center(child: CircularProgressIndicator());
       },
     );
 
     try {
-      await Future.delayed(const Duration(milliseconds: 400));
-
       final user = FirebaseAuth.instance.currentUser;
       final carpetaRef = FirebaseFirestore.instance
           .collection('users')
@@ -273,30 +266,44 @@ class HomeScreen extends StatelessWidget {
           .collection('Carpetas')
           .doc(carpetaId);
 
-      final flashcardsSnapshot = await carpetaRef.collection('Flashcards').get();
-      for (var doc in flashcardsSnapshot.docs) {
+      // --- LA MAGIA DEL BORRADO EN CASCADA ---
+      
+      // 1. Obtenemos todos los Mazos que hay dentro de esta carpeta
+      final mazosSnapshot = await carpetaRef.collection('Mazos').get();
+      
+      for (var mazoDoc in mazosSnapshot.docs) {
+        // 2. Por cada mazo, obtenemos y borramos todas sus Flashcards
+        final flashcardsSnapshot = await mazoDoc.reference.collection('Flashcards').get();
+        for (var cardDoc in flashcardsSnapshot.docs) {
+          await cardDoc.reference.delete(); // Borramos la tarjeta
+        }
+        
+        // 3. Una vez vaciado, borramos el documento del Mazo
+        await mazoDoc.reference.delete();
+      }
+
+      // (Opcional) Limpieza por si quedaron tarjetas de tu estructura antigua
+      final oldFlashcards = await carpetaRef.collection('Flashcards').get();
+      for (var doc in oldFlashcards.docs) {
         await doc.reference.delete();
       }
 
+      // 4. Finalmente, borramos la Carpeta principal (ahora sí, vacía)
       await carpetaRef.delete();
 
-      // Usamos las variables que guardamos arriba, así no importa que la tarjeta ya no exista
       navegador.pop(); // Quitamos el circulito
       mensajes.showSnackBar(
-        const SnackBar(content: Text('Mazo borrado correctamente'), backgroundColor: Colors.green),
+        const SnackBar(content: Text('Carpeta borrada limpiamente'), backgroundColor: Colors.green),
       );
 
     } catch (e) {
       print("Error al borrar la carpeta: $e");
-      
-      // Si hay error, también quitamos el circulito con seguridad
       navegador.pop();
       mensajes.showSnackBar(
-        const SnackBar(content: Text('Error al borrar el mazo'), backgroundColor: Colors.red),
+        const SnackBar(content: Text('Error al borrar la carpeta'), backgroundColor: Colors.red),
       );
     }
   }
-
   // --- FUNCIÓN EXTRAÍDA: Diálogo de cerrar sesión ---
   void _mostrarDialogoCerrarSesion(BuildContext context) {
     showDialog(

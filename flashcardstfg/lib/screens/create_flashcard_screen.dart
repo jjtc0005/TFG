@@ -298,7 +298,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       return;
     }
 
-    final model = GenerativeModel(model: 'gemini-3.1-flash-lite-preview', apiKey: apiKey);
+    final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
     final cantidad = _numTarjetasController.text;
 
     List<Part> partesPrompt = [];
