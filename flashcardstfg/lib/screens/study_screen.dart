@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flashcardstfg/screens/flashcard_animada.dart'; // Asegúrate de que esta ruta es correcta
+import 'package:flashcardstfg/screens/flashcard_animada.dart';
 
-// =========================================================================
-// PANTALLA 1: MUESTRA LOS MAZOS DENTRO DE LA CARPETA (EL CATÁLOGO)
-// =========================================================================
+
 class StudyScreen extends StatelessWidget {
   final String carpetaId;
   final String nombreCarpeta;
@@ -23,7 +21,6 @@ class StudyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(nombreCarpeta), centerTitle: true),
       body: StreamBuilder<QuerySnapshot>(
-        // AHORA APUNTAMOS A LA COLECCIÓN "Mazos" (Súper rápido y barato)
         stream: FirebaseFirestore.instance
             .collection('users')
             .doc(uid)
@@ -113,12 +110,10 @@ class StudyScreen extends StatelessWidget {
   }
 }
 
-// =========================================================================
-// PANTALLA 2: MODO ESTUDIO (CARRUSEL ANIMADO)
-// =========================================================================
+
 class MazoStudyScreen extends StatefulWidget {
   final String carpetaId;
-  final String mazoId; // AÑADIMOS EL ID DEL MAZO
+  final String mazoId;
   final String tituloMazo;
 
   const MazoStudyScreen({
@@ -141,7 +136,6 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
   void initState() {
     super.initState();
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    // AHORA BUSCAMOS LAS TARJETAS DENTRO DEL MAZO ESPECÍFICO
     _streamTarjetas = FirebaseFirestore.instance
         .collection('users')
         .doc(uid)

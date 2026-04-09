@@ -6,7 +6,7 @@ class SelectorCarpeta extends StatelessWidget {
   final String? carpetaSeleccionada;
   final bool creandoNuevaCarpeta;
   final TextEditingController almacenController;
-  final Function(String?, bool) onChanged; // Avisa al padre de los cambios
+  final Function(String?, bool) onChanged;
 
   const SelectorCarpeta({
     super.key,
