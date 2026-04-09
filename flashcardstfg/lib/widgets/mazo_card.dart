@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flashcardstfg/screens/Flashcardslistscreen.dart';
+import 'package:flashcardstfg/screens/f_list_screen.dart';
 
 class MazoCard extends StatelessWidget {
   final String tituloMazo;
   final int cantidadTarjetas;
   final String carpetaId;
+  final String mazoId;
 
   const MazoCard({
     super.key,
     required this.tituloMazo,
     required this.cantidadTarjetas,
     required this.carpetaId,
+    required this.mazoId
   });
 
   @override
@@ -43,6 +45,7 @@ class MazoCard extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => FlashcardsListScreen(
                 carpetaId: carpetaId,
+                mazoId: mazoId,
                 tituloMazo: tituloMazo,
               ),
             ),

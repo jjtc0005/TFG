@@ -4,11 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class FlashcardsListScreen extends StatelessWidget {
   final String carpetaId;
+  final String mazoId;
   final String tituloMazo;
 
   const FlashcardsListScreen({
     super.key,
     required this.carpetaId,
+    required this.mazoId,
     required this.tituloMazo,
   });
 
@@ -17,18 +19,16 @@ class FlashcardsListScreen extends StatelessWidget {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(tituloMazo),
-      ),
+      appBar: AppBar(title: Text(tituloMazo)),
       body: StreamBuilder<QuerySnapshot>(
-        // AQUÍ ESTÁ EL TRUCO: Filtramos por el título del mazo
         stream: FirebaseFirestore.instance
             .collection('users')
             .doc(uid)
             .collection('Carpetas')
             .doc(carpetaId)
+            .collection('Mazos')
+            .doc(mazoId)
             .collection('Flashcards')
-            .where('titulo_mazo', isEqualTo: tituloMazo) // <-- El filtro
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -67,10 +67,7 @@ class FlashcardsListScreen extends StatelessWidget {
                       const Divider(),
                       Text(
                         'R: $respuesta',
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 15,
-                        ),
+                        style: TextStyle(color: Colors.grey[700], fontSize: 15),
                       ),
                     ],
                   ),

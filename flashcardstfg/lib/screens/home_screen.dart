@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'create_flashcard_screen.dart';
+import 'create_f_screen.dart';
 import 'login_screen.dart';
 import 'package:flashcardstfg/widgets/carpeta_card.dart';
 
@@ -162,7 +162,7 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-// --- FUNCIÓN PARA EDITAR EL NOMBRE DE UNA CARPETA (NUEVA) ---
+// --- FUNCIÓN PARA EDITAR EL NOMBRE DE UNA CARPETA ---
   Future<void> _editarCarpeta(BuildContext context, String carpetaId, String nombreActual) async {
     // Creamos un controlador para el texto y le ponemos el nombre que ya tiene
     final TextEditingController controladorNombre = TextEditingController(text: nombreActual);
@@ -222,8 +222,8 @@ class HomeScreen extends StatelessWidget {
       }
     }
   }
- // --- FUNCIÓN PARA BORRAR CARPETA Y SUS TARJETAS ---
-// --- FUNCIÓN PARA BORRAR CARPETA, MAZOS Y TARJETAS ---
+
+// --- FUNCIÓN PARA BORRAR CARPETA, MAZOS Y TARJETAS ---  
   Future<void> _borrarCarpeta(BuildContext context, String carpetaId, String nombreCarpeta) async {
     // 1. Diálogo de confirmación
     final confirmar = await showDialog<bool>(
@@ -304,7 +304,8 @@ class HomeScreen extends StatelessWidget {
       );
     }
   }
-  // --- FUNCIÓN EXTRAÍDA: Diálogo de cerrar sesión ---
+  
+// --- FUNCIÓN EXTRAÍDA: Diálogo de cerrar sesión ---
   void _mostrarDialogoCerrarSesion(BuildContext context) {
     showDialog(
       context: context,

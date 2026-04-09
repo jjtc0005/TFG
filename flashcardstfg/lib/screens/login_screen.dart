@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../services/auth_services.dart';
 import 'home_screen.dart';
 
-// 1. Cambiamos a StatefulWidget para poder actualizar la pantalla en tiempo real
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -11,7 +10,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // 2. Variable para controlar el estado de carga
+  // 1. Variable para controlar el estado de carga
   bool _isLoading = false;
 
   @override
@@ -33,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 50),
 
-            // 3. Renderizado condicional: o la rueda, o el botón
+            // 2. Botón circular mientras inicia sesión con Google
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton.icon(
@@ -46,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     onPressed: () async {
-                      // 4. Encendemos la rueda de carga antes de hablar con Google
+                      // 3. Activamos el estado de carga
                       setState(() {
                         _isLoading = true;
                       });
@@ -56,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       if (userCredential != null) {
                         print("Login Éxito: ${userCredential.user?.displayName}");
-                        // No hace falta poner _isLoading = false porque cambiamos de pantalla
+
                         if (context.mounted) {
                           Navigator.pushReplacement(
                             context,
@@ -68,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       } else {
                         print("Login fallido o cancelado");
                         
-                        // 5. Si falla o cancela, apagamos la rueda para que vuelva a salir el botón
+                        // 4. Si falla o cancela el inicio cambiamos al estado inicial
                         setState(() {
                           _isLoading = false;
                         });

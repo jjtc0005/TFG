@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class MazosScreen extends StatelessWidget {
   final String carpetaId;
   final String nombreCarpeta;
+  // ELIMINAMOS mazoId de aquí. Esta pantalla muestra MUCHOS mazos, no uno solo.
 
   const MazosScreen({
     super.key,
@@ -27,7 +28,7 @@ class MazosScreen extends StatelessWidget {
             .doc(uid)
             .collection('Carpetas')
             .doc(carpetaId)
-            .collection('Flashcards')
+            .collection('Mazos') // ¡Perfecto! Apuntamos a los Mazos
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -43,31 +44,31 @@ class MazosScreen extends StatelessWidget {
             );
           }
 
-          // 1. Extraemos los títulos únicos usando un Set
-          Set<String> titulosUnicos = {};
-          for (var doc in snapshot.data!.docs) {
-            final data = doc.data() as Map<String, dynamic>;
-            final titulo = data['titulo_mazo'] ?? 'Sin título';
-            titulosUnicos.add(titulo);
-          }
+          // 1. Ya no hay Sets ni for loops. 
+          // La lista de mazos es directamente la lista de documentos que nos da Firebase
+          final listaMazos = snapshot.data!.docs;
 
-          List<String> listaMazos = titulosUnicos.toList();
-
-          // 2. Pintamos la lista usando nuestro nuevo Widget modular
+          // 2. Pintamos la lista
           return ListView.builder(
             itemCount: listaMazos.length,
             itemBuilder: (context, index) {
-              final tituloMazo = listaMazos[index];
               
-              // Contar cuántas tarjetas tiene este mazo
-              final int cantidadTarjetas = snapshot.data!.docs.where(
-                (doc) => (doc.data() as Map<String, dynamic>)['titulo_mazo'] == tituloMazo
-              ).length;
+              // Sacamos el documento del mazo actual de la lista
+              final docMazo = listaMazos[index];
+              final data = docMazo.data() as Map<String, dynamic>;
+              
+              // Extraemos los datos que guardamos cuando creamos el mazo
+              final tituloMazo = data['titulo'] ?? 'Sin título';
+              final int cantidadTarjetas = data['cantidad_tarjetas'] ?? 0;
+              
+              // ¡AQUÍ ESTÁ LA CLAVE! Sacamos el mazoId directamente del documento de Firebase
+              final String elMazoId = docMazo.id; 
 
-              // Usamos la pieza de Lego que hemos extraído
+              // Usamos la pieza de Lego
               return MazoCard(
                 tituloMazo: tituloMazo,
                 cantidadTarjetas: cantidadTarjetas,
+                mazoId: elMazoId, // Se lo pasamos a la tarjeta
                 carpetaId: carpetaId,
               );
             },

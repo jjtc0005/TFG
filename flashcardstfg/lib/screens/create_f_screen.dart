@@ -30,7 +30,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   final TextEditingController _numTarjetasController = TextEditingController();
   final TextEditingController _apuntesController = TextEditingController();
 
-  // --- NUEVAS VARIABLES PARA EL DESPLEGABLE DE CARPETAS ---
   String? _carpetaSeleccionada;
   bool _creandoNuevaCarpeta = false;
 
@@ -78,7 +77,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     });
   }
 
-  // --- FUNCIONES DE ARCHIVO ---
+  // Funciones de archivo
   Future<void> _seleccionarArchivo() async {
     try {
       FilePickerResult? resultado = await FilePicker.platform.pickFiles(
@@ -105,14 +104,14 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   }
 
   /// Función que envía el prompt a la IA de Google Gemini
-  // --- INTERFAZ VISUAL ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Crear flashcards'),
         centerTitle: true,
-        // --- BOTÓN DE VOLVER ATRÁS MEJORADO ---
+        
+        // Botón volver atrás
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
