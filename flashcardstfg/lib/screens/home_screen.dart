@@ -15,22 +15,72 @@ class HomeScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Apuntes'),
-        centerTitle: true,
+      appBar: PreferredSize(
+        
+        // Le sumamos los 20 píxeles de espacio que vamos a darle por arriba.
+        preferredSize: const Size.fromHeight(kToolbarHeight + 20), // kToolbarHeight es la altura estándar del AppBar en Flutter (suele ser 56.0). 
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20.0), // Este es el espacio por encima del AppBar 
+          child: AppBar(
+            scrolledUnderElevation: 0.0,
+            backgroundColor: Colors.white, // Fuerza el fondo blanco siempre
+            title: const Text('Mis Apuntes'),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.logout, color: Colors.redAccent),
+              tooltip: 'Cerrar sesión',
+              onPressed: () => _mostrarDialogoCerrarSesion(context),
+            ),
+
+        // El actions muestra en la pantalla todo empezando por la derecha
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar Sesión',
-            onPressed: () => _mostrarDialogoCerrarSesion(context),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Configuración',
+            onSelected: (value) {
+              if (value == 'theme') {
+                // TODO: Lógica del modo oscuro
+                print("Botón de modo oscuro pulsado");
+              } else if (value == 'language') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('El cambio de idioma estará disponible próximamente.'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'theme',
+                child: Row(
+                  children: [
+                    Icon(Icons.dark_mode_outlined, color: Colors.black87),
+                    SizedBox(width: 12),
+                    Text('Modo Oscuro / Claro'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'language',
+                child: Row(
+                  children: [
+                    Icon(Icons.language, color: Colors.black87),
+                    SizedBox(width: 12),
+                    Text('Idioma (Próximamente)'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
+       ),
       ),
+    ),
       body: Column(
         children: [
 
-          HeaderSaludo(user: user),
-
+          // Ya no hay header, solo dividimos el AppBar con el resto de la aplicación con una línea
           const Divider(),
 
           const Padding(
@@ -58,7 +108,6 @@ class HomeScreen extends StatelessWidget {
                 }
                 
                 if (snapshot.hasError) {
-                  // Si el usuario ya es null (se está cerrando sesión), no mostramos el error feo rojo
                   if (FirebaseAuth.instance.currentUser == null) {
                     return const Center(child: CircularProgressIndicator()); 
                   }
@@ -98,15 +147,12 @@ class HomeScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final carpeta = carpetas[index];
 
-                    // 4. PIEZA EXTRAÍDA: La tarjeta individual
                     return CarpetaCard(
                       idCarpeta: carpeta.id,
                       nombreCarpeta: carpeta['Nombre'] ?? 'Sin nombre',
-                      // Conectamos la señal de editar
                       onEdit: () {
                         _editarCarpeta(context, carpeta.id, carpeta['Nombre'] ?? 'Sin nombre');
                       },
-                      // Conectamos la señal de borrar
                       onDelete: () {
                         _borrarCarpeta(context, carpeta.id, carpeta['Nombre'] ?? 'Sin nombre');   
                       },
@@ -161,12 +207,9 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-// función para editar el nombre de una carpeta
   Future<void> _editarCarpeta(BuildContext context, String carpetaId, String nombreActual) async {
-    // Creamos un controlador para el texto y le ponemos el nombre que ya tiene
     final TextEditingController controladorNombre = TextEditingController(text: nombreActual);
 
-    // Mostramos el diálogo para editar
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -177,34 +220,32 @@ class HomeScreen extends StatelessWidget {
             labelText: 'Nombre del mazo',
             border: OutlineInputBorder(),
           ),
-          autofocus: true, // Para que el teclado salga solo
+          autofocus: true, 
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false), // Cancelar
+            onPressed: () => Navigator.pop(context, false), 
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true), // Confirmar
+            onPressed: () => Navigator.pop(context, true), 
             child: const Text('Guardar'),
           ),
         ],
       ),
     );
 
-    // Si el usuario cancela o no escribe nada nuevo, no hacemos nada
     if (confirmar != true || controladorNombre.text.isEmpty || controladorNombre.text == nombreActual) return;
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      // Actualizamos el nombre en Firebase
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user?.uid)
           .collection('Carpetas')
           .doc(carpetaId)
           .update({
-            'Nombre': controladorNombre.text, // El nuevo nombre
+            'Nombre': controladorNombre.text, 
           });
 
       if (context.mounted) {
@@ -222,10 +263,7 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-// Función para borrar carpeta y todo lo de dentro, añadir las opciones para 
-// borrar un conjunto de flashcards concretas
   Future<void> _borrarCarpeta(BuildContext context, String carpetaId, String nombreCarpeta) async {
-    // 1. Diálogo de confirmación
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -266,32 +304,24 @@ class HomeScreen extends StatelessWidget {
           .collection('Carpetas')
           .doc(carpetaId);
 
-      // --- LA MAGIA DEL BORRADO EN CASCADA ---
-      
-      // 1. Obtenemos todos los Mazos que hay dentro de esta carpeta
       final mazosSnapshot = await carpetaRef.collection('Mazos').get();
       
       for (var mazoDoc in mazosSnapshot.docs) {
-        // 2. Por cada mazo, obtenemos y borramos todas sus Flashcards
         final flashcardsSnapshot = await mazoDoc.reference.collection('Flashcards').get();
         for (var cardDoc in flashcardsSnapshot.docs) {
-          await cardDoc.reference.delete(); // Borramos la tarjeta
+          await cardDoc.reference.delete(); 
         }
-        
-        // 3. Una vez vaciado, borramos el documento del Mazo
         await mazoDoc.reference.delete();
       }
 
-      // (Opcional) Limpieza por si quedaron tarjetas de tu estructura antigua
       final oldFlashcards = await carpetaRef.collection('Flashcards').get();
       for (var doc in oldFlashcards.docs) {
         await doc.reference.delete();
       }
 
-      // 4. Finalmente, borramos la Carpeta principal (ahora sí, vacía)
       await carpetaRef.delete();
 
-      navegador.pop(); // Quitamos el circulito
+      navegador.pop(); 
       mensajes.showSnackBar(
         const SnackBar(content: Text('Carpeta borrada limpiamente'), backgroundColor: Colors.green),
       );
@@ -305,7 +335,6 @@ class HomeScreen extends StatelessWidget {
     }
   }
   
-// Función para cerrar sesión ---
   void _mostrarDialogoCerrarSesion(BuildContext context) {
     showDialog(
       context: context,
@@ -330,4 +359,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
