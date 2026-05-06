@@ -16,17 +16,21 @@ class FlashcardAnimada extends StatefulWidget {
 }
 
 class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerProviderStateMixin {
+  
   // Controlador de la animación
   late AnimationController _controller;
-  // Animación que va de 0 a 1 (lo convertiremos a ángulo luego)
+  
+  // Animación que va de 0 a 1, sirve para el ángulo
   late Animation<double> _animation;
-  // Estado para saber qué lado mostrar (evita parpadeos de texto)
+  
+  // Estado para saber qué lado mostrar 
   bool _esFrente = true;
 
   @override
   void initState() {
     super.initState();
-    // Configuramos el controlador (duración suave de 0.6 segundos)
+    
+    // Configuramos el controlador, duración suave de 0.6 segundos
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -64,17 +68,21 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerPr
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _voltearTarjeta,
+
       // AnimatedBuilder reconstruye solo el giro, optimizando rendimiento
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, child) {
+
           // Calculamos el ángulo actual en radianes (Pi = 180 grados)
           final anguloRadianes = _animation.value * pi;
           
           return Transform(
+
             // 1. Matriz de identidad (la base)
             transform: Matrix4.identity()
-              // 2. Perspectiva (¡ESTA ES LA MAGIA! Da sensación de profundidad 3D)
+
+              // 2. Perspectiva
               // El valor 0.001 hace que lo que esté lejos se vea más pequeño.
               ..setEntry(3, 2, 0.001)
               // 3. Rotación sobre el eje Y (vertical)
@@ -90,7 +98,7 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerPr
                     etiqueta: 'PREGUNTA',
                     icono: Icons.help_outline,
                   )
-                // Usamos Transform.scale(-1, 1) en el reverso para que el texto NO salga al revés (efecto espejo)
+                // Usamos Transform.scale(-1, 1) en el reverso para que el texto no salga al revés
                 : Transform.scale(
                     scaleX: -1, // Volteamos el reverso horizontalmente
                     child: _construirLadoTarjeta(
@@ -144,13 +152,13 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerPr
                 ),
               ],
             ),
-            const Spacer(), // Empuja el texto al centro
+            const Spacer(),
             // Texto principal (centrado y grande)
             Text(
               texto,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 26, // Texto un poco más grande
+                fontSize: 26,
                 fontWeight: FontWeight.w700,
                 color: colorTexto,
                 height: 1.2, // Espaciado entre líneas

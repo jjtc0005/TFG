@@ -54,8 +54,7 @@ class StudyScreen extends StatelessWidget {
 
               final tituloMazo = data['titulo'] ?? 'Sin título';
               final cantidadTarjetas = data['cantidad_tarjetas'] ?? 0;
-              final mazoId = docMazo
-                  .id; // Necesitamos este ID para luego buscar sus tarjetas
+              final mazoId = docMazo.id; // Necesitamos este ID para luego buscar sus tarjetas
 
               return Card(
                 elevation: 3,

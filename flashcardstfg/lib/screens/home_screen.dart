@@ -22,18 +22,17 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar Sesión',
-            onPressed: () => _mostrarDialogoCerrarSesion(context), // Cambiado a función externa
+            onPressed: () => _mostrarDialogoCerrarSesion(context),
           ),
         ],
       ),
       body: Column(
         children: [
-          // 1. PIEZA EXTRAÍDA: Saludo
+
           HeaderSaludo(user: user),
 
           const Divider(),
 
-          // 2. Título corto
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
             child: Align(
@@ -45,7 +44,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // 3. LA CUADRÍCULA DE FIREBASE
+          // Lectura de Firebase
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -162,7 +161,7 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-// --- FUNCIÓN PARA EDITAR EL NOMBRE DE UNA CARPETA ---
+// función para editar el nombre de una carpeta
   Future<void> _editarCarpeta(BuildContext context, String carpetaId, String nombreActual) async {
     // Creamos un controlador para el texto y le ponemos el nombre que ya tiene
     final TextEditingController controladorNombre = TextEditingController(text: nombreActual);
@@ -223,7 +222,8 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-// --- FUNCIÓN PARA BORRAR CARPETA, MAZOS Y TARJETAS ---  
+// Función para borrar carpeta y todo lo de dentro, añadir las opciones para 
+// borrar un conjunto de flashcards concretas
   Future<void> _borrarCarpeta(BuildContext context, String carpetaId, String nombreCarpeta) async {
     // 1. Diálogo de confirmación
     final confirmar = await showDialog<bool>(
@@ -305,7 +305,7 @@ class HomeScreen extends StatelessWidget {
     }
   }
   
-// --- FUNCIÓN EXTRAÍDA: Diálogo de cerrar sesión ---
+// Función para cerrar sesión ---
   void _mostrarDialogoCerrarSesion(BuildContext context) {
     showDialog(
       context: context,

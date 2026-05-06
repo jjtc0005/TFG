@@ -22,7 +22,7 @@ class CarpetaCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Stack( // Usamos Stack para poner el botón encima de todo
         children: [
-          // 1. ÁREA CLICABLE PRINCIPAL (Para ir a estudiar)
+          
           InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: () {
@@ -72,7 +72,7 @@ class CarpetaCard extends StatelessWidget {
             ),
           ),
           
-          // 2. EL BOTÓN DE OPCIONES (En la esquina superior derecha)
+          // Botón de opciones (En la esquina superior derecha)
           Positioned(
             top: 4,
             right: 4,
