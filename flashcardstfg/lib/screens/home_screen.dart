@@ -1,4 +1,4 @@
-import 'package:flashcardstfg/widgets/header_saludo.dart';
+import 'package:flashcardstfg/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,10 +20,9 @@ class HomeScreen extends StatelessWidget {
         // Le sumamos los 20 píxeles de espacio que vamos a darle por arriba.
         preferredSize: const Size.fromHeight(kToolbarHeight + 20), // kToolbarHeight es la altura estándar del AppBar en Flutter (suele ser 56.0). 
         child: Padding(
-          padding: const EdgeInsets.only(top: 20.0), // Este es el espacio por encima del AppBar 
+          padding: const EdgeInsets.only(top: 20.0), 
           child: AppBar(
             scrolledUnderElevation: 0.0,
-            backgroundColor: Colors.white, // Fuerza el fondo blanco siempre
             title: const Text('Mis Apuntes'),
             centerTitle: true,
             leading: IconButton(
@@ -39,8 +38,10 @@ class HomeScreen extends StatelessWidget {
             tooltip: 'Configuración',
             onSelected: (value) {
               if (value == 'theme') {
-                // TODO: Lógica del modo oscuro
-                print("Botón de modo oscuro pulsado");
+                // Si está en claro, ponlo oscuro. Si está en oscuro, ponlo claro.
+                themeNotifier.value = themeNotifier.value == ThemeMode.light 
+                    ? ThemeMode.dark 
+                    : ThemeMode.light;
               } else if (value == 'language') {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -93,7 +94,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-
           // Lectura de Firebase
           Expanded(
             child: StreamBuilder<QuerySnapshot>(

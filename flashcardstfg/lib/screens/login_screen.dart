@@ -12,9 +12,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   // 1. Variable para controlar el estado de carga
   bool _isLoading = false;
-
   @override
   Widget build(BuildContext context) {
+
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -39,10 +41,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: const Icon(Icons.login),
                     label: const Text('Entrar con Google'),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 15,
+                  // CAMBIO DE COLOR DE FONDO
+                      backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                      // CAMBIO DE COLOR DE TEXTO E ICONO
+                      foregroundColor: isDarkMode ? Colors.white : Colors.black87,
+                      // ¡AQUÍ ESTÁ EL BORDE! Sí se puede en ElevatedButton
+                      side: BorderSide(
+                        color: isDarkMode ? Colors.white24 : Colors.grey.shade300,
                       ),
+                      elevation: isDarkMode ? 0 : 2, // En modo oscuro queda mejor sin sombra (0)
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     onPressed: () async {
                       // 3. Activamos el estado de carga

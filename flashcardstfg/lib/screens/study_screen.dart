@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcardstfg/screens/flashcard_animada.dart';
 
-
 class StudyScreen extends StatelessWidget {
   final String carpetaId;
   final String nombreCarpeta;
@@ -17,6 +16,7 @@ class StudyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(title: Text(nombreCarpeta), centerTitle: true),
@@ -34,11 +34,14 @@ class StudyScreen extends StatelessWidget {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Esta carpeta está vacía.\n¡Crea algunos mazos!',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white54 : Colors.grey, 
+                  fontSize: 16
+                ),
               ),
             );
           }
@@ -54,13 +57,17 @@ class StudyScreen extends StatelessWidget {
 
               final tituloMazo = data['titulo'] ?? 'Sin título';
               final cantidadTarjetas = data['cantidad_tarjetas'] ?? 0;
-              final mazoId = docMazo.id; // Necesitamos este ID para luego buscar sus tarjetas
+              final mazoId = docMazo.id; 
 
               return Card(
-                elevation: 3,
+                elevation: isDarkMode ? 1 : 3, // Sombras más sutiles en modo oscuro
+                color: isDarkMode ? Colors.grey[850] : Colors.white, // Fondo de la lista
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isDarkMode ? Colors.white12 : Colors.transparent
+                  ),
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(
@@ -68,8 +75,8 @@ class StudyScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   leading: CircleAvatar(
-                    backgroundColor: Colors.blue.shade100,
-                    child: const Icon(Icons.style, color: Colors.blue),
+                    backgroundColor: isDarkMode ? Colors.blue.withOpacity(0.2) : Colors.blue.shade100,
+                    child: Icon(Icons.style, color: isDarkMode ? Colors.blue.shade200 : Colors.blue),
                   ),
                   title: Text(
                     tituloMazo,
@@ -80,12 +87,12 @@ class StudyScreen extends StatelessWidget {
                   ),
                   subtitle: Text(
                     '$cantidadTarjetas tarjetas',
-                    style: TextStyle(color: Colors.grey.shade700),
+                    style: TextStyle(color: isDarkMode ? Colors.white60 : Colors.grey.shade700),
                   ),
-                  trailing: const Icon(
+                  trailing: Icon(
                     Icons.play_circle_fill,
                     size: 30,
-                    color: Colors.blueAccent,
+                    color: isDarkMode ? Colors.blue.shade300 : Colors.blueAccent,
                   ),
                   onTap: () {
                     Navigator.push(
@@ -108,7 +115,6 @@ class StudyScreen extends StatelessWidget {
     );
   }
 }
-
 
 class MazoStudyScreen extends StatefulWidget {
   final String carpetaId;
@@ -155,12 +161,15 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Detectamos el modo oscuro aquí
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      // 2. ARREGLADO: Si es de noche, usa el fondo por defecto (oscuro), si es de día, tu gris clarito
+      backgroundColor: isDarkMode ? Theme.of(context).scaffoldBackgroundColor : Colors.grey.shade100,
       appBar: AppBar(
         title: Text(widget.tituloMazo),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        // Eliminé el backgroundColor: transparent para que el texto del AppBar se adapte automáticamente
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _streamTarjetas,
@@ -184,10 +193,11 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
                   builder: (context, valorActual, child) {
                     return Text(
                       'Tarjeta $valorActual de ${flashcards.length}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey,
+                        // 3. ARREGLADO: Blanco en oscuro, AzulGrisáceo en claro
+                        color: isDarkMode ? Colors.white70 : Colors.blueGrey,
                       ),
                     );
                   },
@@ -202,8 +212,7 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
                   },
                   itemCount: flashcards.length,
                   itemBuilder: (context, index) {
-                    final data =
-                        flashcards[index].data() as Map<String, dynamic>;
+                    final data = flashcards[index].data() as Map<String, dynamic>;
 
                     return Padding(
                       padding: const EdgeInsets.all(24.0),
@@ -217,11 +226,12 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
                 ),
               ),
 
-              const Padding(
-                padding: EdgeInsets.only(bottom: 30.0),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 30.0),
                 child: Text(
                   '👈 Desliza para cambiar | Toca para girar 👆',
-                  style: TextStyle(color: Colors.grey),
+                  // 4. ARREGLADO: Gris claro en oscuro, gris normal en claro
+                  style: TextStyle(color: isDarkMode ? Colors.white54 : Colors.grey),
                 ),
               ),
             ],

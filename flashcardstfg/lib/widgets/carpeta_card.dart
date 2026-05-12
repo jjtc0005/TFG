@@ -61,7 +61,10 @@ class CarpetaCard extends StatelessWidget {
                       child: Text(
                         nombreCarpeta,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          color:Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -77,7 +80,12 @@ class CarpetaCard extends StatelessWidget {
             top: 4,
             right: 4,
             child: PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: Colors.blueGrey.shade300, size: 20),
+              
+              icon: const Icon(
+                Icons.more_vert,
+                color:Colors.black
+              ),
+              
               // Al elegir una opción...
               onSelected: (value) {
                 if (value == 'edit') {

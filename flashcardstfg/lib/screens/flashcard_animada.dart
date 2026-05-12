@@ -15,21 +15,21 @@ class FlashcardAnimada extends StatefulWidget {
   State<FlashcardAnimada> createState() => _FlashcardAnimadaState();
 }
 
-class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerProviderStateMixin {
-  
+class _FlashcardAnimadaState extends State<FlashcardAnimada>
+    with SingleTickerProviderStateMixin {
   // Controlador de la animación
   late AnimationController _controller;
-  
+
   // Animación que va de 0 a 1, sirve para el ángulo
   late Animation<double> _animation;
-  
-  // Estado para saber qué lado mostrar 
+
+  // Estado para saber qué lado mostrar
   bool _esFrente = true;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Configuramos el controlador, duración suave de 0.6 segundos
     _controller = AnimationController(
       vsync: this,
@@ -37,9 +37,10 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerPr
     );
 
     // Definimos la curva de la animación (EaseInOut para que empiece y acabe suave)
-    _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // Escuchamos la animación para cambiar el estado del texto justo en la mitad del giro (90º)
     _controller.addListener(() {
@@ -66,48 +67,51 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: _voltearTarjeta,
-
-      // AnimatedBuilder reconstruye solo el giro, optimizando rendimiento
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, child) {
-
-          // Calculamos el ángulo actual en radianes (Pi = 180 grados)
           final anguloRadianes = _animation.value * pi;
-          
+
           return Transform(
-
-            // 1. Matriz de identidad (la base)
             transform: Matrix4.identity()
-
-              // 2. Perspectiva
-              // El valor 0.001 hace que lo que esté lejos se vea más pequeño.
               ..setEntry(3, 2, 0.001)
-              // 3. Rotación sobre el eje Y (vertical)
               ..rotateY(anguloRadianes),
-            // Alineamos la rotación en el centro de la tarjeta
             alignment: Alignment.center,
-            
+
             child: _esFrente
                 ? _construirLadoTarjeta(
                     texto: widget.pregunta,
-                    colorFondo: Colors.white,
-                    colorTexto: Colors.blue.shade900,
+                    // ANVERSO: Negro en modo oscuro, Blanco en claro
+                    colorFondo: isDarkMode
+                        ? const Color(0xFF121212)
+                        : Colors.white,
+                    colorTexto: isDarkMode
+                        ? Colors.white
+                        : Colors.blue.shade900,
                     etiqueta: 'PREGUNTA',
                     icono: Icons.help_outline,
+                    isDarkMode: isDarkMode,
                   )
-                // Usamos Transform.scale(-1, 1) en el reverso para que el texto no salga al revés
                 : Transform.scale(
-                    scaleX: -1, // Volteamos el reverso horizontalmente
+                    scaleX: -1,
                     child: _construirLadoTarjeta(
-                        texto: widget.respuesta,
-                        colorFondo: Colors.green.shade50,
-                        colorTexto: Colors.green.shade900,
-                        etiqueta: 'RESPUESTA',
-                        icono: Icons.check_circle_outline,
-                      ),
+                      texto: widget.respuesta,
+                      // REVERSO: Verde muy oscuro en modo oscuro, Verde claro en claro
+                      colorFondo: isDarkMode
+                          ? const Color(0xFF0D2B16)
+                          : Colors.green.shade50,
+                      // Texto de respuesta ahora es blanco puro en modo oscuro
+                      colorTexto: isDarkMode
+                          ? Colors.white
+                          : const Color.fromARGB(255, 0, 255, 17),
+                      etiqueta: 'RESPUESTA',
+                      icono: Icons.check_circle_outline,
+                      isDarkMode: isDarkMode,
+                    ),
                   ),
           );
         },
@@ -115,45 +119,54 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerPr
     );
   }
 
-  // Diseño visual de la tarjeta (mejorado un poco también)
   Widget _construirLadoTarjeta({
     required String texto,
     required Color colorFondo,
     required Color colorTexto,
     required String etiqueta,
     required IconData icono,
+    required bool isDarkMode,
   }) {
     return Card(
       color: colorFondo,
-      elevation: 12, // Más sombra para dar efecto de "flotar" en el 3D
-      shadowColor: Colors.black26,
+      elevation: isDarkMode ? 2 : 12,
+      shadowColor: isDarkMode ? Colors.black : Colors.black26,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28), // Bordes más redondeados
-        side: BorderSide(color: Colors.blue.shade100, width: 1.5),
+        borderRadius: BorderRadius.circular(28),
+        // BORDE: Blanco en modo oscuro como pediste, azul en claro
+        side: BorderSide(
+          color: isDarkMode ? Colors.white : Colors.blue.shade100,
+          width: 2.0, // Un poco más grueso para que resalte el borde blanco
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(30.0),
         child: Column(
           children: [
-            // Cabecera elegante
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icono, size: 20, color: Colors.blueGrey.shade300),
+                // Icono de cabecera más visible
+                Icon(
+                  icono,
+                  size: 20,
+                  color: isDarkMode ? Colors.white70 : Colors.blueGrey.shade300,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   etiqueta,
                   style: TextStyle(
-                    color: Colors.blueGrey.shade400,
+                    color: isDarkMode
+                        ? Colors.white70
+                        : Colors.blueGrey.shade400,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
-                    letterSpacing: 2.0, // Espaciado entre letras profesional
+                    letterSpacing: 2.0,
                   ),
                 ),
               ],
             ),
             const Spacer(),
-            // Texto principal (centrado y grande)
             Text(
               texto,
               textAlign: TextAlign.center,
@@ -161,14 +174,18 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada> with SingleTickerPr
                 fontSize: 26,
                 fontWeight: FontWeight.w700,
                 color: colorTexto,
-                height: 1.2, // Espaciado entre líneas
+                height: 1.2,
               ),
             ),
-            const Spacer(), // Empuja el texto al centro
-            // Pie de tarjeta sutil
+            const Spacer(),
+            // TEXTO DE ABAJO: Ahora pasa a blanco en modo oscuro
             Text(
               'Toca para voltear',
-              style: TextStyle(color: Colors.grey.shade400, fontSize: 11, fontStyle: FontStyle.italic),
+              style: TextStyle(
+                color: isDarkMode ? Colors.white54 : Colors.grey.shade400,
+                fontSize: 11,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ),
