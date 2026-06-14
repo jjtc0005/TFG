@@ -289,6 +289,8 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   }
 
 /// Función optimizada que envía el prompt a Gemini
+/// 
+
   Future<void> _generarConIA() async {
     final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
@@ -305,7 +307,9 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     // ... (Tu prompt se queda igual) ...
     final promptInstrucciones =
         '''
-      Eres un experto en crear material de estudio efectivo. Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el contenido que te proporciono.
+      Eres un experto en crear material de estudio efectivo. 
+      Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards 
+      (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el contenido que te proporciono.
       
       Reglas estrictas y obligatorias:
       1. CANTIDAD EXACTA: Debes devolver exactamente $cantidad tarjetas.
@@ -423,6 +427,8 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       // --- NUEVA ESTRUCTURA DE BASE DE DATOS OPTIMIZADA ---
       
       // 1. Creamos la referencia al nuevo Mazo (Catálogo)
+
+      
       final mazoRef = carpetaPath.doc(carpetaDestino).collection('Mazos').doc();
       
       final batch = FirebaseFirestore.instance.batch();

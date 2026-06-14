@@ -61,7 +61,7 @@ class SelectorCarpeta extends StatelessWidget {
                   ? carpetaSeleccionada
                   : null,
               onChanged: (String? nuevoValor) {
-                // Ejecutamos la función que nos pasó el padre
+                
                 onChanged(nuevoValor, nuevoValor == 'NUEVA');
               },
               validator: (value) => value == null ? 'Selecciona una carpeta' : null,

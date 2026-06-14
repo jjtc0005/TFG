@@ -42,7 +42,9 @@ class HomeScreen extends StatelessWidget {
                 themeNotifier.value = themeNotifier.value == ThemeMode.light 
                     ? ThemeMode.dark 
                     : ThemeMode.light;
-              } else if (value == 'language') {
+              } 
+              /*
+              else if (value == 'language') {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('El cambio de idioma estará disponible próximamente.'),
@@ -50,6 +52,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               }
+              */
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               const PopupMenuItem<String>(
@@ -95,6 +98,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           // Lectura de Firebase
+
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -112,7 +116,8 @@ class HomeScreen extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator()); 
                   }
                   return Center(child: Text('Error: ${snapshot.error}'));
-                }   
+                }
+                   
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
                     child: Column(
