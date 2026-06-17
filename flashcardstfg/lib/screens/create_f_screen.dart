@@ -109,7 +109,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crear flashcards'),
+        title: Text(AppLocalizations.of(context)!.crearFlashcard),
         centerTitle: true,
 
         // Botón volver atrás
@@ -136,8 +136,8 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Datos principales',
+              Text(
+                AppLocalizations.of(context)!.datosprincipales,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -176,7 +176,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                 controller: _numTarjetasController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: '${AppLocalizations.of(context)!.numFlashcards}',
+                  labelText: AppLocalizations.of(context)!.numFlashcards,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.format_list_numbered),
                 ),
@@ -239,7 +239,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                     ? _mostrarMiniaturaFoto()
                     : _crearBotonSubida(
                         Icons.camera_alt,
-                        '${AppLocalizations.of(context)!.tomarFoto}',
+                        AppLocalizations.of(context)!.tomarFoto,
                         _tomarFoto,
                       )
               else if (_metodoSeleccionado == MetodoEntrada.archivo)
@@ -247,7 +247,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                     ? _mostrarArchivoSeleccionado()
                     : _crearBotonSubida(
                         Icons.picture_as_pdf,
-                        '${AppLocalizations.of(context)!.subirArchivo}',
+                        AppLocalizations.of(context)!.subirArchivo,
                         _seleccionarArchivo,
                       ),
 
@@ -284,7 +284,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                       ),
                       icon: const Icon(Icons.auto_awesome),
                       label: Text(
-                        '${AppLocalizations.of(context)!.generarFlashcards}',
+                        AppLocalizations.of(context)!.generarFlashcards,
                         style: TextStyle(fontSize: 16),
                       ),
                     ),
@@ -309,6 +309,8 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
     final cantidad = _numTarjetasController.text;
 
+    final reglaIdioma = AppLocalizations.of(context)!.reglaIdioma;
+
     List<Part> partesPrompt = [];
 
     // ... (Tu prompt se queda igual) ...
@@ -318,6 +320,8 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       Tu tarea obligatoria es generar EXACTAMENTE $cantidad flashcards 
       (tarjetas de pregunta y respuesta) basándote ÚNICAMENTE en el contenido que te proporciono.
       
+      REGLA DE IDIOMA ESTRICTA: $reglaIdioma
+
       Reglas estrictas y obligatorias:
       1. CANTIDAD EXACTA: Debes devolver exactamente $cantidad tarjetas.
       2. CÓMO LLEGAR AL NÚMERO: Divide los conceptos grandes en preguntas más pequeñas.
@@ -392,7 +396,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     try {
       // Damos feedback de que estamos subiendo los datos (la fase más lenta)
       setState(
-        () => _mensajeCarga = "${AppLocalizations.of(context)!.analizandoIA}",
+        () => _mensajeCarga = AppLocalizations.of(context)!.analizandoIA,
       );
 
       final response = await model.generateContent([
@@ -569,7 +573,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              _nombreArchivo ?? 'Archivo seleccionado',
+              _nombreArchivo ?? AppLocalizations.of(context)!.archivoSeleccionado,
               style: const TextStyle(fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),

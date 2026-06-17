@@ -43,6 +43,9 @@
   "texto": "Text",
   "imagen": "Image",
   "archivo": "File",
+  "sintitulo": "No title",
+  "archivoSeleccionado": "Selected file",
+
 
   "mensajeLogin": "Your study, powered by Gemini",
   "mensajeEntrarGoogle": "Sign in with Google",
@@ -59,7 +62,10 @@
 
   "voltear": "Tap to flip.",
 
+  "reglaIdioma": "English",
+
   "crearFlashcard": "Create Flashcards",
+  "datosprincipales": "Main data",
   "tituloMazo": "Deck title",
   "errorTitulo": "Title is required",
   "numFlashcards": "Number of desired Flashcards",

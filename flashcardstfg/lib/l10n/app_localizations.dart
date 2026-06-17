@@ -308,6 +308,18 @@ abstract class AppLocalizations {
   /// **'Archivo'**
   String get archivo;
 
+  /// No description provided for @sintitulo.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin título'**
+  String get sintitulo;
+
+  /// No description provided for @archivoSeleccionado.
+  ///
+  /// In es, this message translates to:
+  /// **'Archivo seleccionado'**
+  String get archivoSeleccionado;
+
   /// No description provided for @mensajeLogin.
   ///
   /// In es, this message translates to:
@@ -377,14 +389,26 @@ abstract class AppLocalizations {
   /// No description provided for @voltear.
   ///
   /// In es, this message translates to:
-  /// **'Toca para voltear.'**
+  /// **'Toca para voltear'**
   String get voltear;
+
+  /// No description provided for @reglaIdioma.
+  ///
+  /// In es, this message translates to:
+  /// **'Español'**
+  String get reglaIdioma;
 
   /// No description provided for @crearFlashcard.
   ///
   /// In es, this message translates to:
   /// **'Crear Flashcards'**
   String get crearFlashcard;
+
+  /// No description provided for @datosprincipales.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos principales'**
+  String get datosprincipales;
 
   /// No description provided for @tituloMazo.
   ///

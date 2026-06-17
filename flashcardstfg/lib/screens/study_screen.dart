@@ -56,7 +56,8 @@ class StudyScreen extends StatelessWidget {
               final docMazo = listaMazos[index];
               final data = docMazo.data() as Map<String, dynamic>;
 
-              final tituloMazo = data['titulo'] ?? 'Sin título';
+              final tituloMazo =
+                  data['titulo'] ?? AppLocalizations.of(context)!.sintitulo;
               final cantidadTarjetas = data['cantidad_tarjetas'] ?? 0;
               final mazoId = docMazo.id;
 
@@ -219,7 +220,7 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
                   valueListenable: _tarjetaActual,
                   builder: (context, valorActual, child) {
                     return Text(
-                      ' ${AppLocalizations.of(context)!.tarjeta} $valorActual ${ AppLocalizations.of(context)!.de} ${flashcards.length}',
+                      ' ${AppLocalizations.of(context)!.tarjeta} $valorActual ${AppLocalizations.of(context)!.de} ${flashcards.length}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

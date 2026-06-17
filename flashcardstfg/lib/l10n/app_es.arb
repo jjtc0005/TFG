@@ -43,6 +43,9 @@
   "texto": "Texto",
   "imagen": "Imagen",
   "archivo": "Archivo",
+  "sintitulo": "Sin título",
+  "archivoSeleccionado": "Archivo seleccionado",
+
 
 
   "mensajeLogin": "Tu estudio, potenciado por Gemini",
@@ -59,9 +62,12 @@
   "de": "de",
   "mensajeDeslizarTocar": "Desliza para cambiar | Toca para girar",
 
-  "voltear": "Toca para voltear.",
+  "voltear": "Toca para voltear",
+
+  "reglaIdioma": "Español",
 
   "crearFlashcard": "Crear Flashcards",
+  "datosprincipales": "Datos principales",
   "tituloMazo": "Título del mazo",
   "errorTitulo": "El título es obligatorio",
   "numFlashcards": "Número de Flashcards deseadas",

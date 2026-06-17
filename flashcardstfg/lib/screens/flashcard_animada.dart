@@ -1,3 +1,4 @@
+import 'package:flashcardstfg/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -92,7 +93,7 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada>
                     colorTexto: isDarkMode
                         ? Colors.white
                         : Colors.blue.shade900,
-                    etiqueta: 'PREGUNTA',
+                    etiqueta: AppLocalizations.of(context)!.pregunta,
                     icono: Icons.help_outline,
                     isDarkMode: isDarkMode,
                   )
@@ -107,7 +108,7 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada>
                         colorTexto: isDarkMode
                             ? Colors.white
                             : Colors.green.shade900, // <--- Este es oscuro y elegante
-                        etiqueta: 'RESPUESTA',
+                        etiqueta: AppLocalizations.of(context)!.respuesta,
                         icono: Icons.check_circle_outline,
                         isDarkMode: isDarkMode,
                       ),
@@ -179,7 +180,7 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada>
             const Spacer(),
             // TEXTO DE ABAJO: Ahora pasa a blanco en modo oscuro
             Text(
-              'Toca para voltear',
+              AppLocalizations.of(context)!.voltear,
               style: TextStyle(
                 color: isDarkMode ? Colors.white54 : Colors.grey.shade400,
                 fontSize: 11,

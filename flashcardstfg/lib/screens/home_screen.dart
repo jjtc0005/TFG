@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
             centerTitle: true,
             leading: IconButton(
               icon: const Icon(Icons.logout, color: Colors.redAccent),
-              tooltip: 'Cerrar sesión',
+              tooltip: AppLocalizations.of(context)!.cerrarSesion,
               onPressed: () => _mostrarDialogoCerrarSesion(context),
             ),
 
@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.settings),
-            tooltip: 'Configuración',
+            tooltip: AppLocalizations.of(context)!.configuracion,
             onSelected: (value) {
               if (value == 'theme') {
                 // Si está en claro, ponlo oscuro. Si está en oscuro, ponlo claro.
@@ -220,8 +220,8 @@ class HomeScreen extends StatelessWidget {
         title: Text(AppLocalizations.of(context)!.mensajeEditar),
         content: TextField(
           controller: controladorNombre,
-          decoration: const InputDecoration(
-            labelText: 'Nombre del mazo',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.nombreMazo,
             border: OutlineInputBorder(),
           ),
           autofocus: true, 

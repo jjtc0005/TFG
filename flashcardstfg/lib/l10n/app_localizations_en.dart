@@ -115,6 +115,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get archivo => 'File';
 
   @override
+  String get sintitulo => 'No title';
+
+  @override
+  String get archivoSeleccionado => 'Selected file';
+
+  @override
   String get mensajeLogin => 'Your study, powered by Gemini';
 
   @override
@@ -151,7 +157,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voltear => 'Tap to flip.';
 
   @override
+  String get reglaIdioma => 'English';
+
+  @override
   String get crearFlashcard => 'Create Flashcards';
+
+  @override
+  String get datosprincipales => 'Main data';
 
   @override
   String get tituloMazo => 'Deck title';
