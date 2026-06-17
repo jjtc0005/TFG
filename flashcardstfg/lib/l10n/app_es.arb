@@ -13,10 +13,18 @@
   "errorCerrarS": "Aviso al desconectar Google",
   "errorGeneralsesion": "Error general cerrando sesión",
   
+  "msgCardEdit": "Editar nombre",
+  "msgCardDelete": "Eliminar mazo",
+
   "mensajeEditar": "Editar nombre del mazo",
   "nombreMazo": "Nombre del mazo",
   "nombreEditado": "Nombre actualizado correctamente",
   "errorEditar": "Error al cambiar el nombre",
+
+  "nuevaCarpeta": "Crear nueva carpeta",
+  "seleccionCarpeta": "Selecciona una carpeta",
+  "nombreCarpeta": "Nombre de la nueva carpeta",
+  "escribirnombre": "Escribe el nombre de la carpeta",
 
   "borrarCarpeta": "¿Borrar esta carpeta?",
   "avisoBorrar": "Se perderán todos los mazos y tarjetas que contenga permanentemente. Esta acción no se puede deshacer.",

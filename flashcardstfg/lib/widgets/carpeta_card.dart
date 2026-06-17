@@ -1,3 +1,5 @@
+import 'package:flashcardstfg/l10n/app_localizations.dart';
+import 'package:flashcardstfg/l10n/app_localizations_en.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcardstfg/screens/study_screen.dart'; // Importante para la navegación
 
@@ -97,19 +99,19 @@ class CarpetaCard extends StatelessWidget {
               // Las opciones del menú
               itemBuilder: (context) => <PopupMenuEntry<String>>[
                 // Opción: Editar
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'edit',
                   child: ListTile(
                     leading: Icon(Icons.edit, size: 20, color: Colors.blueAccent),
-                    title: Text('Editar nombre'),
+                    title: Text(AppLocalizations.of(context)!.msgCardEdit),
                   ),
                 ),
                 // Opción: Borrar
-                const PopupMenuItem<String>(
+                PopupMenuItem<String>(
                   value: 'delete',
                   child: ListTile(
                     leading: Icon(Icons.delete, size: 20, color: Colors.red),
-                    title: Text('Eliminar mazo'),
+                    title: Text(AppLocalizations.of(context)!.msgCardDelete),
                   ),
                 ),
               ],

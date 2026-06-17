@@ -13,10 +13,18 @@
   "errorCerrarS": "Warning when disconnecting Google",
   "errorGeneralsesion": "General error logging out",
   
+  "msgCardEdit": "Edit name",
+  "msgCardDelete": "Delete deck",
+
   "mensajeEditar": "Edit deck name",
   "nombreMazo": "Deck name",
   "nombreEditado": "Name updated successfully",
   "errorEditar": "Error changing name",
+
+  "nuevaCarpeta": "Create new folder",
+  "seleccionCarpeta": "Select a folder",
+  "nombreCarpeta": "New folder's name",
+  "escribirnombre": "Type the name of the folder",
 
   "borrarCarpeta": "Delete this folder?",
   "avisoBorrar": "All decks and cards it contains will be permanently lost. This action cannot be undone.",
@@ -68,5 +76,7 @@
   "analizandoIA": "Analyzing with Artificial Intelligence",
   "saveFl": "Saving Flashcards",
   "errorIA": "Artificial Intelligence model error",
-  "carpetaVacia": "This folder is empty. Create some Decks"
+  "carpetaVacia": "This folder is empty. Create some Decks",
+  "mazogenerado": "Deck generated instantly",
+  "errorBaseDatos": "Databases updating error"
 }

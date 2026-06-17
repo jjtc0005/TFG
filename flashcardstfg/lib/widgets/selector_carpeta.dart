@@ -1,3 +1,4 @@
+import 'package:flashcardstfg/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,10 +40,10 @@ class SelectorCarpeta extends StatelessWidget {
         }
 
         opciones.add(
-          const DropdownMenuItem(
+          DropdownMenuItem(
             value: 'NUEVA',
             child: Text(
-              '➕ Crear nueva carpeta...',
+              '➕ ${AppLocalizations.of(context)!.nuevaCarpeta}',
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
             ),
           ),
@@ -51,8 +52,8 @@ class SelectorCarpeta extends StatelessWidget {
         return Column(
           children: [
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                labelText: 'Selecciona una Carpeta',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.seleccionCarpeta,
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.folder),
               ),
@@ -70,14 +71,14 @@ class SelectorCarpeta extends StatelessWidget {
               const SizedBox(height: 16),
               TextFormField(
                 controller: almacenController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre de la nueva carpeta',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.nombreCarpeta,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.create_new_folder),
                 ),
                 validator: (value) {
                   if (creandoNuevaCarpeta && (value == null || value.isEmpty)) {
-                    return 'Escribe el nombre de la carpeta';
+                    return '${AppLocalizations.of(context)?.escribirnombre}';
                   }
                   return null;
                 },

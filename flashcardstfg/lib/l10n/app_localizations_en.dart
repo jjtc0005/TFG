@@ -39,6 +39,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorGeneralsesion => 'General error logging out';
 
   @override
+  String get msgCardEdit => 'Edit name';
+
+  @override
+  String get msgCardDelete => 'Delete deck';
+
+  @override
   String get mensajeEditar => 'Edit deck name';
 
   @override
@@ -49,6 +55,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorEditar => 'Error changing name';
+
+  @override
+  String get nuevaCarpeta => 'Create new folder';
+
+  @override
+  String get seleccionCarpeta => 'Select a folder';
+
+  @override
+  String get nombreCarpeta => 'New folder\'s name';
+
+  @override
+  String get escribirnombre => 'Type the name of the folder';
 
   @override
   String get borrarCarpeta => 'Delete this folder?';
@@ -187,8 +205,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get carpetaVacia => 'This folder is empty. Create some Decks';
 
   @override
-  String get mazogenerado => 'Mazo generado al instante';
+  String get mazogenerado => 'Deck generated instantly';
 
   @override
-  String get errorBaseDatos => 'Error en la subida a la base de datos';
+  String get errorBaseDatos => 'Databases updating error';
 }

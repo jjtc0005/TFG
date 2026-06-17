@@ -158,6 +158,18 @@ abstract class AppLocalizations {
   /// **'Error general cerrando sesión'**
   String get errorGeneralsesion;
 
+  /// No description provided for @msgCardEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar nombre'**
+  String get msgCardEdit;
+
+  /// No description provided for @msgCardDelete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar mazo'**
+  String get msgCardDelete;
+
   /// No description provided for @mensajeEditar.
   ///
   /// In es, this message translates to:
@@ -181,6 +193,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Error al cambiar el nombre'**
   String get errorEditar;
+
+  /// No description provided for @nuevaCarpeta.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear nueva carpeta'**
+  String get nuevaCarpeta;
+
+  /// No description provided for @seleccionCarpeta.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona una carpeta'**
+  String get seleccionCarpeta;
+
+  /// No description provided for @nombreCarpeta.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de la nueva carpeta'**
+  String get nombreCarpeta;
+
+  /// No description provided for @escribirnombre.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre de la carpeta'**
+  String get escribirnombre;
 
   /// No description provided for @borrarCarpeta.
   ///

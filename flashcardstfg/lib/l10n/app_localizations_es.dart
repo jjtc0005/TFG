@@ -39,6 +39,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorGeneralsesion => 'Error general cerrando sesión';
 
   @override
+  String get msgCardEdit => 'Editar nombre';
+
+  @override
+  String get msgCardDelete => 'Eliminar mazo';
+
+  @override
   String get mensajeEditar => 'Editar nombre del mazo';
 
   @override
@@ -49,6 +55,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorEditar => 'Error al cambiar el nombre';
+
+  @override
+  String get nuevaCarpeta => 'Crear nueva carpeta';
+
+  @override
+  String get seleccionCarpeta => 'Selecciona una carpeta';
+
+  @override
+  String get nombreCarpeta => 'Nombre de la nueva carpeta';
+
+  @override
+  String get escribirnombre => 'Escribe el nombre de la carpeta';
 
   @override
   String get borrarCarpeta => '¿Borrar esta carpeta?';
