@@ -1,3 +1,4 @@
+import 'package:flashcardstfg/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_services.dart';
 import 'home_screen.dart';
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const Text('Tu estudio, potenciado por Gemini'),
+            Text(AppLocalizations.of(context)!.mensajeLogin),
 
             const SizedBox(height: 50),
 
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? const CircularProgressIndicator()
                 : ElevatedButton.icon(
                     icon: const Icon(Icons.login),
-                    label: const Text('Entrar con Google'),
+                    label: Text(AppLocalizations.of(context)!.mensajeEntrarGoogle),
                     style: ElevatedButton.styleFrom(
                   // CAMBIO DE COLOR DE FONDO
                       backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
@@ -59,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         _isLoading = true;
                       });
                       
-                      print("Botón pulsado. Iniciando login...");
+                      print("${AppLocalizations.of(context)!.botonPulsadoLogin} ");
                       final userCredential = await AuthService().signInWithGoogle();
 
                       if (userCredential != null) {
@@ -83,8 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("No se pudo iniciar sesión"),
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.errorSesion),
                               backgroundColor: Colors.red,
                             ),
                           );

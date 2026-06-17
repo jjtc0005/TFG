@@ -98,20 +98,19 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada>
                   )
                 : Transform.scale(
                     scaleX: -1,
-                    child: _construirLadoTarjeta(
-                      texto: widget.respuesta,
-                      // REVERSO: Verde muy oscuro en modo oscuro, Verde claro en claro
-                      colorFondo: isDarkMode
-                          ? const Color(0xFF0D2B16)
-                          : Colors.green.shade50,
-                      // Texto de respuesta ahora es blanco puro en modo oscuro
-                      colorTexto: isDarkMode
-                          ? Colors.white
-                          : const Color.fromARGB(255, 0, 255, 17),
-                      etiqueta: 'RESPUESTA',
-                      icono: Icons.check_circle_outline,
-                      isDarkMode: isDarkMode,
-                    ),
+                      child: _construirLadoTarjeta(
+                        texto: widget.respuesta,
+                        colorFondo: isDarkMode
+                            ? const Color(0xFF0D2B16)
+                            : Colors.green.shade50,
+                        // ARREGLADO: Blanco en modo oscuro, y un verde muy oscuro/negro en modo claro
+                        colorTexto: isDarkMode
+                            ? Colors.white
+                            : Colors.green.shade900, // <--- Este es oscuro y elegante
+                        etiqueta: 'RESPUESTA',
+                        icono: Icons.check_circle_outline,
+                        isDarkMode: isDarkMode,
+                      ),
                   ),
           );
         },

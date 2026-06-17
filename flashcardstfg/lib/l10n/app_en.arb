@@ -1,0 +1,72 @@
+{
+  "tituloHome": "My Notes",
+  "tusMazos": "Your Decks",
+  "crearMazo": "Create Deck",
+    
+  "error": "Error",
+  "errorMazos": "You don't have any decks yet",
+
+  "cerrarSesion": "Log out",
+  "confirmacionSesion": "Are you sure you want to log out?",
+  "salir": "Yes, log out",
+
+  "errorCerrarS": "Warning when disconnecting Google",
+  "errorGeneralsesion": "General error logging out",
+  
+  "mensajeEditar": "Edit deck name",
+  "nombreMazo": "Deck name",
+  "nombreEditado": "Name updated successfully",
+  "errorEditar": "Error changing name",
+
+  "borrarCarpeta": "Delete this folder?",
+  "avisoBorrar": "All decks and cards it contains will be permanently lost. This action cannot be undone.",
+  "borrar": "Yes, delete everything",
+  "confirmadoBorrado": "Folder successfully deleted",
+  "errorBorrar": "Error deleting folder.",
+  
+  "configuracion": "Settings",
+  "modoColor": "Dark / Light Mode",
+  "idioma": "Change language",
+
+  "cancelar": "Cancel",
+  "guardar": "Save",
+  "pregunta": "Question",
+  "respuesta": "Answer",
+  "texto": "Text",
+  "imagen": "Image",
+  "archivo": "File",
+
+  "mensajeLogin": "Your study, powered by Gemini",
+  "mensajeEntrarGoogle": "Sign in with Google",
+  "botonPulsadoLogin": "Button pressed, initiating login",
+  "exitoLogin": "Login successful",
+  "errorLogin": "Login failed or cancelled",
+  "errorSesion": "Could not log in",
+  
+  "errorTarjetas": "There are no cards in this deck",
+  "tarjetas": "Cards",
+  "tarjeta": "Card",
+  "de": "of",
+  "mensajeDeslizarTocar": "Swipe to change | Tap to flip",
+
+  "voltear": "Tap to flip.",
+
+  "crearFlashcard": "Create Flashcards",
+  "tituloMazo": "Deck title",
+  "errorTitulo": "Title is required",
+  "numFlashcards": "Number of desired Flashcards",
+  "numero": "Enter a number",
+  "errorNum": "Must be a valid number",
+  "pegarApuntes": "Paste your notes here",
+  "tomarFoto": "Take Photo or Upload Image",
+  "subirArchivo": "Upload PDF or document",
+  "generarFlashcards": "Generate Flashcards",
+  "errorAPI": "API reading error",
+  "prepararArchivo": "Preparing file",
+  "procesarImagen": "Processing image",
+  "noInternet": "No internet connection",
+  "analizandoIA": "Analyzing with Artificial Intelligence",
+  "saveFl": "Saving Flashcards",
+  "errorIA": "Artificial Intelligence model error",
+  "carpetaVacia": "This folder is empty. Create some Decks"
+}

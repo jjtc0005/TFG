@@ -1,3 +1,4 @@
+import 'package:flashcardstfg/l10n/app_localizations.dart';
 import 'package:flashcardstfg/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,7 +24,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.only(top: 20.0), 
           child: AppBar(
             scrolledUnderElevation: 0.0,
-            title: const Text('Mis Apuntes'),
+            title: Text(AppLocalizations.of(context)!.tituloHome),
             centerTitle: true,
             leading: IconButton(
               icon: const Icon(Icons.logout, color: Colors.redAccent),
@@ -43,35 +44,33 @@ class HomeScreen extends StatelessWidget {
                     ? ThemeMode.dark 
                     : ThemeMode.light;
               } 
-              /*
+              
               else if (value == 'language') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('El cambio de idioma estará disponible próximamente.'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                localeNotifier.value = localeNotifier.value.languageCode == 'es'
+                    ? const Locale('en')
+                    : const Locale('es');
               }
-              */
+
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'theme',
                 child: Row(
                   children: [
-                    Icon(Icons.dark_mode_outlined, color: Colors.black87),
-                    SizedBox(width: 12),
-                    Text('Modo Oscuro / Claro'),
+                    const Icon(Icons.dark_mode_outlined, color: Colors.black87),
+                    const SizedBox(width: 12),
+                    Text(AppLocalizations.of(context)!.modoColor),
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
+               PopupMenuItem<String>(
                 value: 'language',
                 child: Row(
                   children: [
-                    Icon(Icons.language, color: Colors.black87),
-                    SizedBox(width: 12),
-                    Text('Idioma (Próximamente)'),
+                    const Icon(Icons.language, color: Colors.black87),
+                    const SizedBox(width: 12),
+                    // Usamos el diccionario en lugar de texto fijo
+                    Text(AppLocalizations.of(context)!.idioma), 
                   ],
                 ),
               ),
@@ -87,13 +86,13 @@ class HomeScreen extends StatelessWidget {
           // Ya no hay header, solo dividimos el AppBar con el resto de la aplicación con una línea
           const Divider(),
 
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Tus Mazos',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                AppLocalizations.of(context)!.tusMazos,
+               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -129,8 +128,8 @@ class HomeScreen extends StatelessWidget {
                           color: Colors.grey.shade400,
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Aún no tienes mazos.',
+                        Text(
+                          AppLocalizations.of(context)!.errorMazos,
                           style: TextStyle(color: Colors.grey),
                         ),
                       ],
@@ -181,7 +180,7 @@ class HomeScreen extends StatelessWidget {
           );
         },
         icon: const Icon(Icons.auto_awesome),
-        label: const Text('Crear Mazo'),
+        label: Text(AppLocalizations.of(context)!.crearMazo),
       ),
     );
   }
@@ -193,7 +192,7 @@ class HomeScreen extends StatelessWidget {
       try {
         await googleSignIn.disconnect();
       } catch (e) {
-        print("Aviso al desconectar Google: $e");
+        print("${AppLocalizations.of(context)!.errorCerrarS} $e");
       }
       if (context.mounted) {
         Navigator.pushReplacement(
@@ -202,7 +201,7 @@ class HomeScreen extends StatelessWidget {
         );
       }
     } catch (e) {
-      print("Error general cerrando sesión: $e");
+      print("${AppLocalizations.of(context)!.errorGeneralsesion} $e");
       if (context.mounted) {
         Navigator.pushReplacement(
           context,
@@ -218,7 +217,7 @@ class HomeScreen extends StatelessWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Editar nombre del mazo'),
+        title: Text(AppLocalizations.of(context)!.mensajeEditar),
         content: TextField(
           controller: controladorNombre,
           decoration: const InputDecoration(
@@ -230,11 +229,11 @@ class HomeScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false), 
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context)!.cancelar),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true), 
-            child: const Text('Guardar'),
+            child: Text(AppLocalizations.of(context)!.guardar),
           ),
         ],
       ),
@@ -255,14 +254,14 @@ class HomeScreen extends StatelessWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Nombre actualizado correctamente'), backgroundColor: Colors.green),
+          SnackBar(content: Text(AppLocalizations.of(context)!.nombreEditado), backgroundColor: Colors.green),
         );
       }
     } catch (e) {
-      print("Error al editar la carpeta: $e");
+      print("${AppLocalizations.of(context)!.errorEditar} $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al cambiar el nombre'), backgroundColor: Colors.red),
+           SnackBar(content: Text(AppLocalizations.of(context)!.errorEditar), backgroundColor: Colors.red),
         );
       }
     }
@@ -272,17 +271,17 @@ class HomeScreen extends StatelessWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('¿Borrar esta carpeta?'),
-        content: const Text('Se perderán todos los mazos y tarjetas que contenga permanentemente. Esta acción no se puede deshacer.'),
+        title: Text(AppLocalizations.of(context)!.borrarCarpeta),
+        content: Text(AppLocalizations.of(context)!.avisoBorrar),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context)!.cancelar),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Sí, borrar TODO'),
+            child: Text(AppLocalizations.of(context)!.borrar),
           ),
         ],
       ),
@@ -328,14 +327,14 @@ class HomeScreen extends StatelessWidget {
 
       navegador.pop(); 
       mensajes.showSnackBar(
-        const SnackBar(content: Text('Carpeta borrada limpiamente'), backgroundColor: Colors.green),
+       SnackBar(content: Text(AppLocalizations.of(context)!.confirmadoBorrado), backgroundColor: Colors.green),
       );
 
     } catch (e) {
-      print("Error al borrar la carpeta: $e");
+      print("${AppLocalizations.of(context)!.errorBorrar} $e");
       navegador.pop();
       mensajes.showSnackBar(
-        const SnackBar(content: Text('Error al borrar la carpeta'), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorBorrar), backgroundColor: Colors.red),
       );
     }
   }
@@ -344,12 +343,12 @@ class HomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog( 
-        title: const Text('Cerrar Sesión'),
-        content: const Text('¿Seguro que quieres salir?'),
+        title: Text(AppLocalizations.of(context)!.cerrarSesion),
+        content: Text(AppLocalizations.of(context)!.confirmacionSesion),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext), 
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context)!.cancelar),
           ),
           TextButton(
             onPressed: () {
@@ -357,7 +356,7 @@ class HomeScreen extends StatelessWidget {
               _cerrarSesion(context); 
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Sí, salir'),
+            child: Text(AppLocalizations.of(context)!.salir),
           ),
         ],
       ),

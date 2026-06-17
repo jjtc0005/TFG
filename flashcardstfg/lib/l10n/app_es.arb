@@ -1,0 +1,76 @@
+{
+  "tituloHome": "Mis Apuntes",
+  "tusMazos": "Tus Mazos",
+  "crearMazo": "Crear Mazo",
+    
+  "error": "Error",
+  "errorMazos": "Aún no tienes mazos",
+
+  "cerrarSesion": "Cerrar sesión",
+  "confirmacionSesion": "¿Seguro que quiere salir?",
+  "salir": "Sí salir",
+
+  "errorCerrarS": "Aviso al desconectar Google",
+  "errorGeneralsesion": "Error general cerrando sesión",
+  
+  "mensajeEditar": "Editar nombre del mazo",
+  "nombreMazo": "Nombre del mazo",
+  "nombreEditado": "Nombre actualizado correctamente",
+  "errorEditar": "Error al cambiar el nombre",
+
+  "borrarCarpeta": "¿Borrar esta carpeta?",
+  "avisoBorrar": "Se perderán todos los mazos y tarjetas que contenga permanentemente. Esta acción no se puede deshacer.",
+  "borrar": "Sí, borrar Todo",
+  "confirmadoBorrado": "Carpeta borrada limpiamente",
+  "errorBorrar": "Error al borrar la carpeta.",
+  
+  "configuracion": "Configuración",
+  "modoColor": "Modo Oscuro / Claro",
+  "idioma": "Cambiar idioma",
+
+  "cancelar": "Cancelar",
+  "guardar": "Guardar",
+  "pregunta": "Pregunta",
+  "respuesta": "Respuesta",
+  "texto": "Texto",
+  "imagen": "Imagen",
+  "archivo": "Archivo",
+
+
+  "mensajeLogin": "Tu estudio, potenciado por Gemini",
+  "mensajeEntrarGoogle": "Entrar con Google",
+  "botonPulsadoLogin": "Botón pulsado, iniciando Login",
+  "exitoLogin": "Login con éxito",
+  "errorLogin": "Login fallido o cancelado",
+  "errorSesion": "No se pudo inciar sesión",
+  
+  
+  "errorTarjetas": "No hay tarjetas en este mazo",
+  "tarjetas": "tarjetas",
+  "tarjeta": "Tarjeta",
+  "de": "de",
+  "mensajeDeslizarTocar": "Desliza para cambiar | Toca para girar",
+
+  "voltear": "Toca para voltear.",
+
+  "crearFlashcard": "Crear Flashcards",
+  "tituloMazo": "Título del mazo",
+  "errorTitulo": "El título es obligatorio",
+  "numFlashcards": "Número de Flashcards deseadas",
+  "numero": "Introduce un número",
+  "errorNum": "Debe ser un número válido",
+  "pegarApuntes": "Pega aquí tus apuntes",
+  "tomarFoto": "Tomar Foto o Subir Imagen",
+  "subirArchivo": "Subir PDF o documento",
+  "generarFlashcards": "Generar Flashcards",
+  "errorAPI": "Error en la lectura de la API",
+  "prepararArchivo": "Preparando archivo",
+  "procesarImagen": "Procesando imagen",
+  "noInternet": "Sin internet",
+  "analizandoIA": "Analizando con Inteligencia Artificial",
+  "saveFl": "Guardando Flashcards",
+  "errorIA": "Error del modelo de Inteligencia Artificial",
+  "carpetaVacia": "Esta carpeta está vacía. Crea algunos mazos",
+  "mazogenerado": "Mazo generado al instante",
+  "errorBaseDatos": "Error en la subida a la base de datos"
+}
