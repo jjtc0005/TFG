@@ -308,22 +308,31 @@ class HomeScreen extends StatelessWidget {
           .collection('Carpetas')
           .doc(carpetaId);
 
+      // 1. Instanciamos el batch
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Petición de lectura de los mazos (Requiere red) 
       final mazosSnapshot = await carpetaRef.collection('Mazos').get();
-      
+
       for (var mazoDoc in mazosSnapshot.docs) {
+
+        // Petición de lectura de las flashcards del mazo (Requiere red) 
         final flashcardsSnapshot = await mazoDoc.reference.collection('Flashcards').get();
+        
+        // Encolado iterativo de la destrucción de tarjetas 
         for (var cardDoc in flashcardsSnapshot.docs) {
-          await cardDoc.reference.delete(); 
+          batch.delete(cardDoc.reference); 
         }
-        await mazoDoc.reference.delete();
+       
+	      // Encolado de la destrucción del documento del mazo
+        batch.delete(mazoDoc.reference);
       }
 
-      final oldFlashcards = await carpetaRef.collection('Flashcards').get();
-      for (var doc in oldFlashcards.docs) {
-        await doc.reference.delete();
-      }
+     // Encolado de la destrucción del documento raíz de la carpeta 
+      batch.delete(carpetaRef);
 
-      await carpetaRef.delete();
+      // 6. Ejecutamos todas las eliminaciones de golpe
+      await batch.commit();
 
       navegador.pop(); 
       mensajes.showSnackBar(
