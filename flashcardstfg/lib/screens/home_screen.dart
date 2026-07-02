@@ -39,43 +39,69 @@ class HomeScreen extends StatelessWidget {
             tooltip: AppLocalizations.of(context)!.configuracion,
             onSelected: (value) {
               if (value == 'theme') {
-                // Si está en claro, ponlo oscuro. Si está en oscuro, ponlo claro.
+                // Modo oscuro / claro original
                 themeNotifier.value = themeNotifier.value == ThemeMode.light 
                     ? ThemeMode.dark 
                     : ThemeMode.light;
-              } 
-              
-              else if (value == 'language') {
-                localeNotifier.value = localeNotifier.value.languageCode == 'es'
-                    ? const Locale('en')
-                    : const Locale('es');
+              } else {
+                // Si el valor no es 'theme', es el código del idioma ('es', 'en', 'pt')
+                localeNotifier.value = Locale(value);
               }
-
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              // 1. Botón de Modo Oscuro/Claro
               PopupMenuItem<String>(
                 value: 'theme',
                 child: Row(
                   children: [
-                    const Icon(Icons.dark_mode_outlined, color: Colors.black87),
+                    Icon(
+                      themeNotifier.value == ThemeMode.light 
+                          ? Icons.dark_mode_outlined 
+                          : Icons.light_mode_outlined, 
+                      color: Colors.black87
+                    ),
                     const SizedBox(width: 12),
                     Text(AppLocalizations.of(context)!.modoColor),
                   ],
                 ),
               ),
-               PopupMenuItem<String>(
-                value: 'language',
+              
+              // 2. Separador visual
+              const PopupMenuDivider(),
+
+              // 3. Opciones de idiomas
+              const PopupMenuItem<String>(
+                value: 'es',
                 child: Row(
                   children: [
-                    const Icon(Icons.language, color: Colors.black87),
-                    const SizedBox(width: 12),
-                    // Usamos el diccionario en lugar de texto fijo
-                    Text(AppLocalizations.of(context)!.idioma), 
+                    Text('🇪🇸'),
+                    SizedBox(width: 12),
+                    Text('Español'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'en',
+                child: Row(
+                  children: [
+                    Text('🇬🇧'),
+                    SizedBox(width: 12),
+                    Text('English'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'pt',
+                child: Row(
+                  children: [
+                    Text('🇵🇹'),
+                    SizedBox(width: 12),
+                    Text('Português'),
                   ],
                 ),
               ),
             ],
-          ),
+          )
         ],
        ),
       ),

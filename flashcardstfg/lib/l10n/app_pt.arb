@@ -1,0 +1,87 @@
+{
+  "tituloHome": "Minhas Notas",
+  "tusMazos": "Seus Baralhos",
+  "crearMazo": "Criar Baralho",
+    
+  "error": "Erro",
+  "errorMazos": "Você ainda não tem baralhos",
+
+  "cerrarSesion": "Sair",
+  "confirmacionSesion": "Tem certeza de que deseja sair?",
+  "salir": "Sim, sair",
+
+  "errorCerrarS": "Aviso ao desconectar do Google",
+  "errorGeneralsesion": "Erro geral ao encerrar a sessão",
+  
+  "msgCardEdit": "Editar nome",
+  "msgCardDelete": "Excluir baralho",
+
+  "mensajeEditar": "Editar nome do baralho",
+  "nombreMazo": "Nome do baralho",
+  "nombreEditado": "Nome atualizado com sucesso",
+  "errorEditar": "Erro ao alterar o nome",
+
+  "nuevaCarpeta": "Criar nova pasta",
+  "seleccionCarpeta": "Selecione uma pasta",
+  "nombreCarpeta": "Nome da nova pasta",
+  "escribirnombre": "Digite o nome da pasta",
+
+  "borrarCarpeta": "Excluir esta pasta?",
+  "avisoBorrar": "Todos os baralhos e cartões contidos nela serão perdidos permanentemente. Esta ação não pode ser desfeita.",
+  "borrar": "Sim, excluir tudo",
+  "confirmadoBorrado": "Pasta excluída com sucesso",
+  "errorBorrar": "Erro ao excluir a pasta.",
+  
+  "configuracion": "Configurações",
+  "modoColor": "Modo Escuro / Claro",
+  "idioma": "Mudar idioma",
+
+  "cancelar": "Cancelar",
+  "guardar": "Salvar",
+  "pregunta": "Pergunta",
+  "respuesta": "Resposta",
+  "texto": "Texto",
+  "imagen": "Imagem",
+  "archivo": "Arquivo",
+  "sintitulo": "Sem título",
+  "archivoSeleccionado": "Arquivo selecionado",
+
+  "mensajeLogin": "Seus estudos, potencializados pelo Gemini",
+  "mensajeEntrarGoogle": "Entrar com o Google",
+  "botonPulsadoLogin": "Botão pressionado, iniciando Login",
+  "exitoLogin": "Login realizado com sucesso",
+  "errorLogin": "Login falhou ou foi cancelado",
+  "errorSesion": "Não foi possível iniciar a sessão",
+  
+  "errorTarjetas": "Não há cartões neste baralho",
+  "tarjetas": "cartões",
+  "tarjeta": "Cartão",
+  "de": "de",
+  "mensajeDeslizarTocar": "Deslize para mudar | Toque para virar",
+
+  "voltear": "Toque para virar",
+
+  "reglaIdioma": "Português",
+
+  "crearFlashcard": "Criar Flashcards",
+  "datosprincipales": "Dados principais",
+  "tituloMazo": "Título do baralho",
+  "errorTitulo": "O título é obrigatório",
+  "numFlashcards": "Número de Flashcards desejados",
+  "numero": "Insira um número",
+  "errorNum": "Deve ser um número válido",
+  "pegarApuntes": "Cole suas anotações aqui",
+  "tomarFoto": "Tirar foto ou enviar imagem",
+  "subirArchivo": "Enviar PDF ou documento",
+  "generarFlashcards": "Gerar Flashcards",
+  "errorAPI": "Erro na leitura da API",
+  "prepararArchivo": "Preparando arquivo",
+  "procesarImagen": "Processando imagem",
+  "noInternet": "Sem internet",
+  "analizandoIA": "Analisando com Inteligência Artificial",
+  "saveFl": "Salvando Flashcards",
+  "errorIA": "Erro do modelo de Inteligência Artificial",
+  "carpetaVacia": "Esta pasta está vazia. Crie alguns baralhos",
+  "mazogenerado": "Baralho gerado instantaneamente",
+  "errorBaseDatos": "Erro no envio para o banco de dados"
+}
