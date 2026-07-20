@@ -21,6 +21,8 @@ class StudyScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(nombreCarpeta), centerTitle: true),
+
+      
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('users')
@@ -102,12 +104,40 @@ class StudyScreen extends StatelessWidget {
                       color: isDarkMode ? Colors.white60 : Colors.grey.shade700,
                     ),
                   ),
-                  trailing: Icon(
-                    Icons.play_circle_fill,
-                    size: 30,
-                    color: isDarkMode
-                        ? Colors.blue.shade300
-                        : Colors.blueAccent,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.play_circle_fill,
+                        size: 30,
+                        color: isDarkMode
+                            ? Colors.blue.shade300
+                            : Colors.blueAccent,
+                      ),
+                      PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: isDarkMode ? Colors.white70 : Colors.black87,
+                        ),
+                        onSelected: (value) {
+                          if (value == 'delete') {
+                            _borrarMazo(context, mazoId, tituloMazo);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.delete, color: Colors.red, size: 20),
+                                const SizedBox(width: 12),
+                                Text(AppLocalizations.of(context)!.borrar), // Usa el texto "Borrar" que ya tienes traducido
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   onTap: () {
                     Navigator.push(
@@ -128,6 +158,79 @@ class StudyScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _borrarMazo(BuildContext context, String mazoId, String tituloMazo) async {
+    // 1. Diálogo de confirmación
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.borrar),
+        content: Text('¿Estás seguro de que deseas borrar el mazo "$tituloMazo" y todas sus tarjetas?'), 
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancelar),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(AppLocalizations.of(context)!.borrar),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return;
+
+    final navegador = Navigator.of(context);
+    final mensajes = ScaffoldMessenger.of(context);
+
+    // Indicador de carga
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      final mazoRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('Carpetas')
+          .doc(carpetaId) // carpetaId ya lo tenemos disponible en la clase
+          .collection('Mazos')
+          .doc(mazoId);
+
+      // 2. Iniciamos el Lote de escritura (WriteBatch)
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Petición de lectura de las flashcards del mazo (Requiere red)
+      final flashcardsSnapshot = await mazoRef.collection('Flashcards').get();
+      
+      // Encolado iterativo de la destrucción de tarjetas
+      for (var cardDoc in flashcardsSnapshot.docs) {
+        batch.delete(cardDoc.reference);
+      }
+      
+      // Encolado de la destrucción del mazo en sí
+      batch.delete(mazoRef);
+
+      // 3. Ejecución atómica
+      await batch.commit();
+
+      navegador.pop(); // Cerramos el indicador de carga
+      mensajes.showSnackBar(
+        const SnackBar(content: Text('Mazo borrado correctamente'), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      print("Error al borrar mazo: $e");
+      navegador.pop();
+      mensajes.showSnackBar(
+        const SnackBar(content: Text('Error al borrar el mazo'), backgroundColor: Colors.red),
+      );
+    }
   }
 }
 

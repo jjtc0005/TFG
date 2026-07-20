@@ -41,6 +41,8 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   File? _imagenSeleccionada;
   final ImagePicker _picker = ImagePicker();
 
+  final int limiteMaximoTarjetas = 30;
+
   // Variables para el archivo
   File? _archivoSeleccionado;
   String? _nombreArchivo;
@@ -172,22 +174,62 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               ),
               const SizedBox(height: 16),
 
-              TextFormField(
-                controller: _numTarjetasController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.numFlashcards,
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.format_list_numbered),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "${AppLocalizations.of(context)!.numero} ";
-                  }
-                  if (int.tryParse(value) == null) {
-                    return "${AppLocalizations.of(context)!.errorNum} ";
-                  }
-                  return null;
+                  TextFormField(
+                    controller: _numTarjetasController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.numFlashcards,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.format_list_numbered),
+                      
+                      // 1. AÑADIDO: Icono de información (suffixIcon aparece a la derecha del campo)
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
+                        onPressed: () {
+                          // Mostramos un pequeño popup de aviso al pulsar el icono
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Row(
+                                children: [
+                                  Icon(Icons.info, color: Colors.blueAccent),
+                                  SizedBox(width: 8),
+                                  Text("Rendimiento", style: TextStyle(fontSize: 18)),
+                                ],
+                              ),
+                              content: const Text(
+                                "Procesar textos o documentos muy extensos para generar un alto número de tarjetas requiere mayor capacidad de procesamiento. Esto ralentizará el tiempo de creación. Por favor, sé paciente mientras la IA analiza el contenido.",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Entendido"),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    // 2. AÑADIDO: Validación del límite
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "${AppLocalizations.of(context)!.numero} ";
+                      }
+                      
+                      final int? cantidadParseada = int.tryParse(value);
+                      
+                      if (cantidadParseada == null) {
+                        return "${AppLocalizations.of(context)!.errorNum} ";
+                      }
+                      if (cantidadParseada <= 0) {
+                        return "Debe generar al menos 1 tarjeta"; // Idealmente pasar a AppLocalizations
+                      }
+                      if (cantidadParseada > limiteMaximoTarjetas) {
+                        return "El límite es de $limiteMaximoTarjetas tarjetas por petición"; // Idealmente pasar a AppLocalizations
+                      }
+                      return null;
                 },
               ),
 
@@ -306,7 +348,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       return;
     }
 
-    final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
+    final model = GenerativeModel(model: 'gemini-3.1-flash-lite', apiKey: apiKey);
     final cantidad = _numTarjetasController.text;
 
     final reglaIdioma = AppLocalizations.of(context)!.reglaIdioma;
