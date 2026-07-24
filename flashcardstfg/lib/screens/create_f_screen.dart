@@ -14,18 +14,25 @@ import 'package:flashcardstfg/widgets/selector_carpeta.dart';
 enum MetodoEntrada { texto, imagen, archivo }
 
 class CreateFlashcardScreen extends StatefulWidget {
-  const CreateFlashcardScreen({super.key});
+  // --- AÑADIDO: Parámetros opcionales para saber si venimos desde dentro de una carpeta ---
+  final String? carpetaIdPredefinida;
+  final String? nombreCarpetaPredefinida;
+
+  const CreateFlashcardScreen({
+    super.key, 
+    this.carpetaIdPredefinida, 
+    this.nombreCarpetaPredefinida
+  });
+  // --- FIN DEL AÑADIDO ---
 
   @override
   State<CreateFlashcardScreen> createState() => _CreateFlashcardScreen();
 }
 
 class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
-  // Llave maestra del formulario
   final _formKey = GlobalKey<FormState>();
   String? _mensajeCarga;
 
-  // Controladores de texto
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _almacenController = TextEditingController();
   final TextEditingController _numTarjetasController = TextEditingController();
@@ -34,16 +41,13 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   String? _carpetaSeleccionada;
   bool _creandoNuevaCarpeta = false;
 
-  // Estado del selector (por defecto en texto)
   MetodoEntrada _metodoSeleccionado = MetodoEntrada.texto;
 
-  // Variables para la imagen
   File? _imagenSeleccionada;
   final ImagePicker _picker = ImagePicker();
 
   final int limiteMaximoTarjetas = 30;
 
-  // Variables para el archivo
   File? _archivoSeleccionado;
   String? _nombreArchivo;
 
@@ -56,7 +60,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     super.dispose();
   }
 
-  // --- FUNCIONES DE CÁMARA ---
   Future<void> _tomarFoto() async {
     try {
       final XFile? fotoTomada = await _picker.pickImage(
@@ -80,7 +83,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     });
   }
 
-  // Funciones de archivo
   Future<void> _seleccionarArchivo() async {
     try {
       FilePickerResult? resultado = await FilePicker.platform.pickFiles(
@@ -106,23 +108,18 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     });
   }
 
-  /// Función que envía el prompt a la IA de Google Gemini
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.crearFlashcard),
         centerTitle: true,
-
-        // Botón volver atrás
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // 1. Intentamos volver de forma natural
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             } else {
-              // 2. Si no hay historial, forzamos la navegación al Home
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -160,76 +157,95 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Selector de la carpeta extraido a widget
-              SelectorCarpeta(
-                carpetaSeleccionada: _carpetaSeleccionada,
-                creandoNuevaCarpeta: _creandoNuevaCarpeta,
-                almacenController: _almacenController,
-                onChanged: (nuevoValor, esNueva) {
-                  setState(() {
-                    _carpetaSeleccionada = nuevoValor;
-                    _creandoNuevaCarpeta = esNueva;
-                  });
-                },
-              ),
+              // --- MODIFICADO: Condicional para mostrar selector o texto fijo ---
+              if (widget.nombreCarpetaPredefinida != null)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.folder, color: Colors.blue),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Guardando en: ${widget.nombreCarpetaPredefinida}',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                SelectorCarpeta(
+                  carpetaSeleccionada: _carpetaSeleccionada,
+                  creandoNuevaCarpeta: _creandoNuevaCarpeta,
+                  almacenController: _almacenController,
+                  onChanged: (nuevoValor, esNueva) {
+                    setState(() {
+                      _carpetaSeleccionada = nuevoValor;
+                      _creandoNuevaCarpeta = esNueva;
+                    });
+                  },
+                ),
+              // --- FIN DE LO MODIFICADO ---
+              
               const SizedBox(height: 16),
 
-                  TextFormField(
-                    controller: _numTarjetasController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.numFlashcards,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.format_list_numbered),
-                      
-                      // 1. AÑADIDO: Icono de información (suffixIcon aparece a la derecha del campo)
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
-                        onPressed: () {
-                          // Mostramos un pequeño popup de aviso al pulsar el icono
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Row(
-                                children: [
-                                  Icon(Icons.info, color: Colors.blueAccent),
-                                  SizedBox(width: 8),
-                                  Text("Rendimiento", style: TextStyle(fontSize: 18)),
-                                ],
-                              ),
-                              content: const Text(
-                                "Procesar textos o documentos muy extensos para generar un alto número de tarjetas requiere mayor capacidad de procesamiento. Esto ralentizará el tiempo de creación. Por favor, sé paciente mientras la IA analiza el contenido.",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Entendido"),
-                                ),
-                              ],
+              TextFormField(
+                controller: _numTarjetasController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.numFlashcards,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.format_list_numbered),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Row(
+                            children: [
+                              Icon(Icons.info, color: Colors.blueAccent),
+                              SizedBox(width: 8),
+                              Text("Rendimiento", style: TextStyle(fontSize: 18)),
+                            ],
+                          ),
+                          content: const Text(
+                            "Procesar textos o documentos muy extensos para generar un alto número de tarjetas requiere mayor capacidad de procesamiento. Esto ralentizará el tiempo de creación. Por favor, sé paciente mientras la IA analiza el contenido.",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Entendido"),
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                    
-                    // 2. AÑADIDO: Validación del límite
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "${AppLocalizations.of(context)!.numero} ";
-                      }
-                      
-                      final int? cantidadParseada = int.tryParse(value);
-                      
-                      if (cantidadParseada == null) {
-                        return "${AppLocalizations.of(context)!.errorNum} ";
-                      }
-                      if (cantidadParseada <= 0) {
-                        return "Debe generar al menos 1 tarjeta"; // Idealmente pasar a AppLocalizations
-                      }
-                      if (cantidadParseada > limiteMaximoTarjetas) {
-                        return "El límite es de $limiteMaximoTarjetas tarjetas por petición"; // Idealmente pasar a AppLocalizations
-                      }
-                      return null;
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "${AppLocalizations.of(context)!.numero} ";
+                  }
+                  
+                  final int? cantidadParseada = int.tryParse(value);
+                  
+                  if (cantidadParseada == null) {
+                    return "${AppLocalizations.of(context)!.errorNum} ";
+                  }
+                  if (cantidadParseada <= 0) {
+                    return "Debe generar al menos 1 tarjeta"; 
+                  }
+                  if (cantidadParseada > limiteMaximoTarjetas) {
+                    return "El límite es de $limiteMaximoTarjetas tarjetas por petición"; 
+                  }
+                  return null;
                 },
               ),
 
@@ -265,7 +281,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
               const SizedBox(height: 24),
 
-              // --- ÁREA DINÁMICA ---
               if (_metodoSeleccionado == MetodoEntrada.texto)
                 TextFormField(
                   controller: _apuntesController,
@@ -295,7 +310,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
               const SizedBox(height: 40),
 
-              // Botón final
               _mensajeCarga != null
                   ? Center(
                       child: Column(
@@ -337,9 +351,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     );
   }
 
-  /// Función optimizada que envía el prompt a Gemini
-  ///
-
   Future<void> _generarConIA() async {
     final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
@@ -355,7 +366,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
     List<Part> partesPrompt = [];
 
-    // ... (Tu prompt se queda igual) ...
     final promptInstrucciones =
         '''
       Eres un experto en crear material de estudio efectivo. 
@@ -385,8 +395,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       if (_archivoSeleccionado == null) return;
 
       setState(
-        () =>
-            _mensajeCarga = AppLocalizations.of(context)!.prepararArchivo,
+        () => _mensajeCarga = AppLocalizations.of(context)!.prepararArchivo,
       );
 
       partesPrompt.add(TextPart(promptInstrucciones));
@@ -419,7 +428,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       partesPrompt.add(DataPart(tipoMime, bytesDeImagen));
     }
 
-    // Comprobamos Internet
     try {
       final resultado = await InternetAddress.lookup('google.com');
       if (resultado.isEmpty) {
@@ -436,7 +444,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     }
 
     try {
-      // Damos feedback de que estamos subiendo los datos (la fase más lenta)
       setState(
         () => _mensajeCarga = AppLocalizations.of(context)!.analizandoIA,
       );
@@ -445,7 +452,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         Content.multi(partesPrompt),
       ]);
 
-      // Pasamos a la fase de guardado
       setState(() => _mensajeCarga = AppLocalizations.of(context)!.saveFl);
       if (mounted) {
         await _guardarRepuestaBbdd(response.text ?? '');
@@ -460,10 +466,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     }
   }
 
-  /// Permite guardar en la base de datos la respuesta de la IA con las
-  /// flashcards en batch creando una instancia vacía que podemos rellenar y volver
-  /// a actualizar, esto optimiza la versión anterior que creaba en memoria una
-  /// tarjeta y la rellenaba de una en una
   Future<void> _guardarRepuestaBbdd(String respuestaGemini) async {
     try {
       final usuario = FirebaseAuth.instance.currentUser;
@@ -479,8 +481,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
 
       if (_creandoNuevaCarpeta && _almacenController.text.isNotEmpty) {
         nombreCarpeta = _almacenController.text;
-      } else if (_carpetaSeleccionada != null &&
-          _carpetaSeleccionada != 'NUEVA') {
+      } else if (_carpetaSeleccionada != null && _carpetaSeleccionada != 'NUEVA') {
         nombreCarpeta = _carpetaSeleccionada!;
       }
 
@@ -488,38 +489,39 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           .collection('users')
           .doc(usuario.uid)
           .collection('Carpetas');
+          
       String carpetaDestino;
 
-      final busqueda = await carpetaPath
-          .where("Nombre", isEqualTo: nombreCarpeta)
-          .get();
-
-      if (busqueda.docs.isNotEmpty) {
-        carpetaDestino = busqueda.docs.first.id;
+      // --- MODIFICADO: Condicional para no buscar la carpeta si ya sabemos su ID ---
+      if (widget.carpetaIdPredefinida != null) {
+        carpetaDestino = widget.carpetaIdPredefinida!;
       } else {
-        final nuevaCarpeta = await carpetaPath.add({
-          "Nombre": nombreCarpeta,
-          "fechaCreacion": FieldValue.serverTimestamp(),
-        });
-        carpetaDestino = nuevaCarpeta.id;
+        final busqueda = await carpetaPath
+            .where("Nombre", isEqualTo: nombreCarpeta)
+            .get();
+
+        if (busqueda.docs.isNotEmpty) {
+          carpetaDestino = busqueda.docs.first.id;
+        } else {
+          final nuevaCarpeta = await carpetaPath.add({
+            "Nombre": nombreCarpeta,
+            "fechaCreacion": FieldValue.serverTimestamp(),
+          });
+          carpetaDestino = nuevaCarpeta.id;
+        }
       }
-
-      // --- NUEVA ESTRUCTURA DE BASE DE DATOS OPTIMIZADA ---
-
-      // 1. Creamos la referencia al nuevo Mazo (Catálogo)
+      // --- FIN DE LO MODIFICADO ---
 
       final mazoRef = carpetaPath.doc(carpetaDestino).collection('Mazos').doc();
 
       final batch = FirebaseFirestore.instance.batch();
 
-      // 2. Guardamos los datos principales del Mazo
       batch.set(mazoRef, {
         'titulo': _tituloController.text,
         'cantidad_tarjetas': tarjetasGeneradas.length,
         'fechaCreacion': FieldValue.serverTimestamp(),
       });
 
-      // 3. La subcolección de flashcards ahora va DENTRO de ese mazo
       final flashcardsRef = mazoRef.collection('Flashcards');
 
       for (var tarjeta in tarjetasGeneradas) {
@@ -532,17 +534,17 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         });
       }
 
-      await batch.commit(); // Subimos el Mazo y todas sus tarjetas de golpe
+      await batch.commit();
 
       if (mounted) {
-        setState(() => _mensajeCarga = null); // Ocultamos la carga
+        setState(() => _mensajeCarga = null);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.mazogenerado),
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // Volvems al menú
+        Navigator.pop(context); 
       }
     } catch (e) {
       setState(() => _mensajeCarga = null);
@@ -554,7 +556,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
     }
   }
 
-  // --- WIDGETS DE APOYO VISUAL ---
   Widget _crearBotonSubida(IconData icono, String texto, VoidCallback accion) {
     return InkWell(
       onTap: accion,

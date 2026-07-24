@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcardstfg/screens/flashcard_animada.dart';
+import 'package:flashcardstfg/screens/create_f_screen.dart';
 
 class StudyScreen extends StatelessWidget {
   final String carpetaId;
@@ -22,7 +23,24 @@ class StudyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(nombreCarpeta), centerTitle: true),
 
-      
+      // --- AÑADIDO: El botón flotante que abre el formulario inteligente ---
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateFlashcardScreen(
+                carpetaIdPredefinida: carpetaId,
+                nombreCarpetaPredefinida: nombreCarpeta,
+              ),
+            ),
+          );
+        },
+        icon: const Icon(Icons.auto_awesome),
+        label: const Text('Generar con IA'),
+      ),
+      // --- FIN DEL AÑADIDO ---
+
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('users')
@@ -64,12 +82,8 @@ class StudyScreen extends StatelessWidget {
               final mazoId = docMazo.id;
 
               return Card(
-                elevation: isDarkMode
-                    ? 1
-                    : 3, // Sombras más sutiles en modo oscuro
-                color: isDarkMode
-                    ? Colors.grey[850]
-                    : Colors.white, // Fondo de la lista
+                elevation: isDarkMode ? 1 : 3,
+                color: isDarkMode ? Colors.grey[850] : Colors.white,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -131,7 +145,7 @@ class StudyScreen extends StatelessWidget {
                               children: [
                                 const Icon(Icons.delete, color: Colors.red, size: 20),
                                 const SizedBox(width: 12),
-                                Text(AppLocalizations.of(context)!.borrar), // Usa el texto "Borrar" que ya tienes traducido
+                                Text(AppLocalizations.of(context)!.borrar),
                               ],
                             ),
                           ),
@@ -161,7 +175,6 @@ class StudyScreen extends StatelessWidget {
   }
 
   Future<void> _borrarMazo(BuildContext context, String mazoId, String tituloMazo) async {
-    // 1. Diálogo de confirmación
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -186,7 +199,6 @@ class StudyScreen extends StatelessWidget {
     final navegador = Navigator.of(context);
     final mensajes = ScaffoldMessenger.of(context);
 
-    // Indicador de carga
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -199,28 +211,21 @@ class StudyScreen extends StatelessWidget {
           .collection('users')
           .doc(uid)
           .collection('Carpetas')
-          .doc(carpetaId) // carpetaId ya lo tenemos disponible en la clase
+          .doc(carpetaId)
           .collection('Mazos')
           .doc(mazoId);
 
-      // 2. Iniciamos el Lote de escritura (WriteBatch)
       final batch = FirebaseFirestore.instance.batch();
-
-      // Petición de lectura de las flashcards del mazo (Requiere red)
       final flashcardsSnapshot = await mazoRef.collection('Flashcards').get();
       
-      // Encolado iterativo de la destrucción de tarjetas
       for (var cardDoc in flashcardsSnapshot.docs) {
         batch.delete(cardDoc.reference);
       }
       
-      // Encolado de la destrucción del mazo en sí
       batch.delete(mazoRef);
-
-      // 3. Ejecución atómica
       await batch.commit();
 
-      navegador.pop(); // Cerramos el indicador de carga
+      navegador.pop(); 
       mensajes.showSnackBar(
         const SnackBar(content: Text('Mazo borrado correctamente'), backgroundColor: Colors.green),
       );

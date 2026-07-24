@@ -8,8 +8,6 @@ import 'create_f_screen.dart';
 import 'login_screen.dart';
 import 'package:flashcardstfg/widgets/carpeta_card.dart';
 
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -19,10 +17,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: PreferredSize(
-        // Le sumamos los 20 píxeles de espacio que vamos a darle por arriba.
-        preferredSize: const Size.fromHeight(
-          kToolbarHeight + 20,
-        ), // kToolbarHeight es la altura estándar del AppBar en Flutter (suele ser 56.0).
+        preferredSize: const Size.fromHeight(kToolbarHeight + 20),
         child: Padding(
           padding: const EdgeInsets.only(top: 20.0),
           child: AppBar(
@@ -34,25 +29,20 @@ class HomeScreen extends StatelessWidget {
               tooltip: AppLocalizations.of(context)!.cerrarSesion,
               onPressed: () => _mostrarDialogoCerrarSesion(context),
             ),
-
-            // El actions muestra en la pantalla todo empezando por la derecha
             actions: [
               PopupMenuButton<String>(
                 icon: const Icon(Icons.settings),
                 tooltip: AppLocalizations.of(context)!.configuracion,
                 onSelected: (value) {
                   if (value == 'theme') {
-                    // Modo oscuro / claro original
                     themeNotifier.value = themeNotifier.value == ThemeMode.light
                         ? ThemeMode.dark
                         : ThemeMode.light;
                   } else {
-                    // Si el valor no es 'theme', es el código del idioma ('es', 'en', 'pt')
                     localeNotifier.value = Locale(value);
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  // 1. Botón de Modo Oscuro/Claro
                   PopupMenuItem<String>(
                     value: 'theme',
                     child: Row(
@@ -68,11 +58,7 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // 2. Separador visual
                   const PopupMenuDivider(),
-
-                  // 3. Opciones de idiomas
                   const PopupMenuItem<String>(
                     value: 'es',
                     child: Row(
@@ -111,9 +97,7 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Ya no hay header, solo dividimos el AppBar con el resto de la aplicación con una línea
           const Divider(),
-
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
             child: Align(
@@ -124,8 +108,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // Lectura de Firebase
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -137,14 +119,12 @@ class HomeScreen extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
                   if (FirebaseAuth.instance.currentUser == null) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
                     child: Column(
@@ -178,7 +158,6 @@ class HomeScreen extends StatelessWidget {
                   itemCount: carpetas.length,
                   itemBuilder: (context, index) {
                     final carpeta = carpetas[index];
-
                     return CarpetaCard(
                       idCarpeta: carpeta.id,
                       nombreCarpeta: carpeta['Nombre'] ?? 'Sin nombre',
@@ -205,55 +184,140 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
 
-      // BOTÓN FLOTANTE
-      /*floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateFlashcardScreen(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.auto_awesome),
-        label: Text(AppLocalizations.of(context)!.crearMazo),
-      ),
-      */
-      floatingActionButton: SpeedDial(
-        icon: Icons.add, // Icono principal cuando está cerrado
-        activeIcon: Icons.close, // Icono cuando se abre el menú
-        spacing: 3,
-        spaceBetweenChildren: 4,
-        tooltip: 'Crear contenido',
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.folder_open),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-            label: 'Nueva Carpeta',
-            onTap: () {
-              // Aquí llamaremos al diálogo para crear SOLO la carpeta
-              _mostrarDialogoCrearCarpeta(context);
-            },
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.flash_on),
-            backgroundColor: Colors.orange,
-            foregroundColor: Colors.white,
-            label: 'Creación Rápida',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateFlashcardScreen(),
-                ),
-              );
-            },
-          ),
-        ],
+      // --- MODIFICADO: Botón flotante clásico que despliega el menú ---
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _mostrarPanelCreacion(context),
+        child: const Icon(Icons.add),
       ),
     );
   }
+
+  void _mostrarPanelCreacion(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(
+            top: 16,
+            bottom: 40,
+            left: 16,
+            right: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Barrita superior visual (deslizar)
+              Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Título central
+              const Text(
+                '¿Qué deseas crear?',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 30),
+
+              // Fila con los dos botones grandes
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // --- BOTÓN 1: CARPETA VACÍA ---
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      _mostrarDialogoCrearCarpeta(context);
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 35,
+                            // Fondo azul translúcido que combina con la carpeta
+                            backgroundColor: Colors.blue.withOpacity(0.15),
+                            child: const Icon(
+                              Icons.folder_open,
+                              size: 35,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Carpeta\nVacía',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // --- BOTÓN 2: MAZO CON IA ---
+                  // --- BOTÓN 2: MAZO CON IA (TOTALMENTE ARMONIZADO) ---
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateFlashcardScreen(),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 35,
+                            // Fondo ámbar translúcido que combina con la estrella
+                            backgroundColor: Colors.amber.withOpacity(0.15),
+                            child: const Icon(
+                              Icons.auto_awesome,
+                              size: 35,
+                              color: Colors.amber, // Estrella ámbar brillante
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Mazo\nRápido',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  // --- FIN DEL AÑADIDO ---
 
   Future<void> _cerrarSesion(BuildContext context) async {
     try {
@@ -298,45 +362,35 @@ class HomeScreen extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // Botón cancelar
+              onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar'),
             ),
-FilledButton(
-  onPressed: () async {
-    // 1. Comprobamos que el texto no esté vacío
-    if (nombreController.text.trim().isNotEmpty) {
-      
-      // 2. Obtenemos el usuario que está logueado actualmente
-      final user = FirebaseAuth.instance.currentUser;
-      
-      if (user != null) {
-        try {
-          // 3. Creamos el documento en la ruta exacta de tu base de datos
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .collection('Carpetas')
-              .add({
-            'Nombre': nombreController.text.trim(), 
-            'fechaCreacion': FieldValue.serverTimestamp(),
-            // Si en tu modelo de BD guardas la fecha, puedes añadirla aquí, ej:
-            // 'fechaCreacion': FieldValue.serverTimestamp(),
-          });
+            FilledButton(
+              onPressed: () async {
+                if (nombreController.text.trim().isNotEmpty) {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .collection('Carpetas')
+                          .add({
+                            'Nombre': nombreController.text.trim(),
+                            'fechaCreacion': FieldValue.serverTimestamp(),
+                          });
 
-          // 4. Cerramos el diálogo solo si ha ido bien
-          if (context.mounted) {
-            Navigator.pop(context); 
-          }
-          
-        } catch (e) {
-          // (Opcional) Mostrar un mensajito de error si falla la conexión
-          print("Error al crear la carpeta: $e");
-        }
-      }
-    }
-  },
-  child: const Text('Crear'),
-),
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    } catch (e) {
+                      print("Error al crear la carpeta: $e");
+                    }
+                  }
+                }
+              },
+              child: const Text('Crear'),
+            ),
           ],
         );
       },
@@ -379,8 +433,9 @@ FilledButton(
 
     if (confirmar != true ||
         controladorNombre.text.isEmpty ||
-        controladorNombre.text == nombreActual)
+        controladorNombre.text == nombreActual) {
       return;
+    }
 
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -457,31 +512,21 @@ FilledButton(
           .collection('Carpetas')
           .doc(carpetaId);
 
-      // 1. Instanciamos el batch
       final batch = FirebaseFirestore.instance.batch();
-
-      // Petición de lectura de los mazos (Requiere red)
       final mazosSnapshot = await carpetaRef.collection('Mazos').get();
 
       for (var mazoDoc in mazosSnapshot.docs) {
-        // Petición de lectura de las flashcards del mazo (Requiere red)
         final flashcardsSnapshot = await mazoDoc.reference
             .collection('Flashcards')
             .get();
 
-        // Encolado iterativo de la destrucción de tarjetas
         for (var cardDoc in flashcardsSnapshot.docs) {
           batch.delete(cardDoc.reference);
         }
-
-        // Encolado de la destrucción del documento del mazo
         batch.delete(mazoDoc.reference);
       }
 
-      // Encolado de la destrucción del documento raíz de la carpeta
       batch.delete(carpetaRef);
-
-      // 6. Ejecutamos todas las eliminaciones de golpe
       await batch.commit();
 
       navegador.pop();
