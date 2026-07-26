@@ -57,7 +57,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get errorEditar => 'Erro ao alterar o nome';
 
   @override
-  String get nuevaCarpeta => 'Criar nova pasta';
+  String get nuevaCarpeta => 'Nova Pasta';
 
   @override
   String get seleccionCarpeta => 'Selecione uma pasta';
@@ -221,4 +221,32 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get errorBaseDatos => 'Erro no envio para o banco de dados';
+
+  @override
+  String get queDeseasCrear => 'O que você deseja criar?';
+
+  @override
+  String get carpetaVaciaBoton => 'Pasta\nVazia';
+
+  @override
+  String get mazoRapidoBoton => 'Baralho\nRápido';
+
+  @override
+  String get ejemploCarpeta => 'Ex: Matemática, História...';
+
+  @override
+  String get crear => 'Criar';
+
+  @override
+  String get generarConIA => 'Gerar com IA';
+
+  @override
+  String get rendimiento => 'Desempenho';
+
+  @override
+  String get mensajeRendimiento =>
+      'Processar textos ou documentos muito longos para gerar um alto número de cartões requer maior capacidade de processamento. Isso atrasará o tempo de criação. Por favor, seja paciente enquanto a IA analisa o conteúdo.';
+
+  @override
+  String get entendido => 'Entendido';
 }

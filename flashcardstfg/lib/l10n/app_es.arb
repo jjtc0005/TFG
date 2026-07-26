@@ -86,5 +86,17 @@
   "errorIA": "Error del modelo de Inteligencia Artificial",
   "carpetaVacia": "Esta carpeta está vacía. Crea algunos mazos",
   "mazogenerado": "Mazo generado al instante",
-  "errorBaseDatos": "Error en la subida a la base de datos"
+  "errorBaseDatos": "Error en la subida a la base de datos",
+
+  
+  "queDeseasCrear": "¿Qué deseas crear?",
+  "carpetaVaciaBoton": "Carpeta\nVacía",
+  "mazoRapidoBoton": "Mazo\nRápido",
+  "nuevaCarpeta": "Nueva Carpeta",
+  "ejemploCarpeta": "Ej: Matemáticas, Historia...",
+  "crear": "Crear",
+  "generarConIA": "Generar con IA",
+  "rendimiento": "Rendimiento",
+  "mensajeRendimiento": "Procesar textos o documentos muy extensos para generar un alto número de tarjetas requiere mayor capacidad de procesamiento. Esto ralentizará el tiempo de creación. Por favor, sé paciente mientras la IA analiza el contenido.",
+  "entendido": "Entendido"
 }

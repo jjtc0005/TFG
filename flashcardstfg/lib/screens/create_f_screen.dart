@@ -208,21 +208,17 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Row(
+                          title: Row(
                             children: [
-                              Icon(Icons.info, color: Colors.blueAccent),
-                              SizedBox(width: 8),
-                              Text("Rendimiento", style: TextStyle(fontSize: 18)),
-                            ],
+                              const Icon(Icons.info, color: Colors.blueAccent),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.rendimiento, style: const TextStyle(fontSize: 18)),                            ],
                           ),
-                          content: const Text(
-                            "Procesar textos o documentos muy extensos para generar un alto número de tarjetas requiere mayor capacidad de procesamiento. Esto ralentizará el tiempo de creación. Por favor, sé paciente mientras la IA analiza el contenido.",
-                          ),
+                          content: Text(AppLocalizations.of(context)!.mensajeRendimiento),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: const Text("Entendido"),
-                            ),
+                              child: Text(AppLocalizations.of(context)!.entendido),                            ),
                           ],
                         ),
                       );
@@ -378,6 +374,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       1. CANTIDAD EXACTA: Debes devolver exactamente $cantidad tarjetas.
       2. CÓMO LLEGAR AL NÚMERO: Divide los conceptos grandes en preguntas más pequeñas.
       3. VERACIDAD: Todo debe salir del contenido proporcionado.
+      4. EXCEPCIÓN DE CONTENIDO: Si la imagen, documento o texto proporcionado NO contiene información útil, es ilegible, o no hay texto real, debes devolver EXACTAMENTE un arreglo JSON vacío: []
       
       IMPORTANTE: Devuelve tu respuesta ÚNICAMENTE en JSON:
       [
@@ -401,6 +398,14 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       partesPrompt.add(TextPart(promptInstrucciones));
 
       final bytesDelArchivo = await _archivoSeleccionado!.readAsBytes();
+
+      if (bytesDelArchivo.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('El archivo está vacío. Sube uno con contenido.')),
+        );
+        return;
+      }
+
       final nombreEnMinusculas = _nombreArchivo!.toLowerCase();
 
       if (nombreEnMinusculas.endsWith('.pdf')) {
@@ -475,7 +480,25 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           .replaceAll('```json', '')
           .replaceAll('```', '')
           .trim();
-      List<dynamic> tarjetasGeneradas = jsonDecode(jsonLimpio);
+
+      List<dynamic> tarjetasGeneradas;
+
+      try{
+        tarjetasGeneradas = jsonDecode(jsonLimpio);
+
+      }catch(e){
+
+        if (mounted) {
+          setState(() => _mensajeCarga = null);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No se detectó información útil en la imagen o documento. Inténtalo de nuevo.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
 
       String nombreCarpeta = "General";
 

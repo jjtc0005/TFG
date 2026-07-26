@@ -6,7 +6,6 @@ import 'screens/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
-// 1. IMPORT ARREGLADO: Ruta oficial del generador de Flutter
 
 // Variable que escucha el estado del tema
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);

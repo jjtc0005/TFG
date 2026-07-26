@@ -57,7 +57,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorEditar => 'Error changing name';
 
   @override
-  String get nuevaCarpeta => 'Create new folder';
+  String get nuevaCarpeta => 'New Folder';
 
   @override
   String get seleccionCarpeta => 'Select a folder';
@@ -221,4 +221,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorBaseDatos => 'Databases updating error';
+
+  @override
+  String get queDeseasCrear => 'What do you want to create?';
+
+  @override
+  String get carpetaVaciaBoton => 'Empty\nFolder';
+
+  @override
+  String get mazoRapidoBoton => 'Quick\nDeck';
+
+  @override
+  String get ejemploCarpeta => 'Ex: Math, History...';
+
+  @override
+  String get crear => 'Create';
+
+  @override
+  String get generarConIA => 'Generate with AI';
+
+  @override
+  String get rendimiento => 'Performance';
+
+  @override
+  String get mensajeRendimiento =>
+      'Processing very long texts or documents to generate a high number of flashcards requires more processing power. This will slow down the creation time. Please be patient while the AI analyzes the content.';
+
+  @override
+  String get entendido => 'Understood';
 }

@@ -84,5 +84,16 @@
   "errorIA": "Artificial Intelligence model error",
   "carpetaVacia": "This folder is empty. Create some Decks",
   "mazogenerado": "Deck generated instantly",
-  "errorBaseDatos": "Databases updating error"
+  "errorBaseDatos": "Databases updating error",
+
+  "queDeseasCrear": "What do you want to create?",
+  "carpetaVaciaBoton": "Empty\nFolder",
+  "mazoRapidoBoton": "Quick\nDeck",
+  "nuevaCarpeta": "New Folder",
+  "ejemploCarpeta": "Ex: Math, History...",
+  "crear": "Create",
+  "generarConIA": "Generate with AI",
+  "rendimiento": "Performance",
+  "mensajeRendimiento": "Processing very long texts or documents to generate a high number of flashcards requires more processing power. This will slow down the creation time. Please be patient while the AI analyzes the content.",
+  "entendido": "Understood"
 }

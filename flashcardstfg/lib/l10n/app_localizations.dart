@@ -199,7 +199,7 @@ abstract class AppLocalizations {
   /// No description provided for @nuevaCarpeta.
   ///
   /// In es, this message translates to:
-  /// **'Crear nueva carpeta'**
+  /// **'Nueva Carpeta'**
   String get nuevaCarpeta;
 
   /// No description provided for @seleccionCarpeta.
@@ -525,6 +525,60 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Error en la subida a la base de datos'**
   String get errorBaseDatos;
+
+  /// No description provided for @queDeseasCrear.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué deseas crear?'**
+  String get queDeseasCrear;
+
+  /// No description provided for @carpetaVaciaBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Carpeta\nVacía'**
+  String get carpetaVaciaBoton;
+
+  /// No description provided for @mazoRapidoBoton.
+  ///
+  /// In es, this message translates to:
+  /// **'Mazo\nRápido'**
+  String get mazoRapidoBoton;
+
+  /// No description provided for @ejemploCarpeta.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Matemáticas, Historia...'**
+  String get ejemploCarpeta;
+
+  /// No description provided for @crear.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear'**
+  String get crear;
+
+  /// No description provided for @generarConIA.
+  ///
+  /// In es, this message translates to:
+  /// **'Generar con IA'**
+  String get generarConIA;
+
+  /// No description provided for @rendimiento.
+  ///
+  /// In es, this message translates to:
+  /// **'Rendimiento'**
+  String get rendimiento;
+
+  /// No description provided for @mensajeRendimiento.
+  ///
+  /// In es, this message translates to:
+  /// **'Procesar textos o documentos muy extensos para generar un alto número de tarjetas requiere mayor capacidad de procesamiento. Esto ralentizará el tiempo de creación. Por favor, sé paciente mientras la IA analiza el contenido.'**
+  String get mensajeRendimiento;
+
+  /// No description provided for @entendido.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get entendido;
 }
 
 class _AppLocalizationsDelegate

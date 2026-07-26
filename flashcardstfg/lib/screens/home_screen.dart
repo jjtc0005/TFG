@@ -221,10 +221,11 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Título central
-              const Text(
-                '¿Qué deseas crear?',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context)!.queDeseasCrear,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+
               const SizedBox(height: 30),
 
               // Fila con los dos botones grandes
@@ -255,20 +256,16 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'Carpeta\nVacía',
+                          Text(
+                            AppLocalizations.of(context)!.carpetaVaciaBoton,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              height: 1.2,
-                            ),
+                            style: const TextStyle(fontWeight: FontWeight.w600, height: 1.2),
                           ),
                         ],
                       ),
                     ),
                   ),
 
-                  // --- BOTÓN 2: MAZO CON IA ---
                   // --- BOTÓN 2: MAZO CON IA (TOTALMENTE ARMONIZADO) ---
                   InkWell(
                     onTap: () {
@@ -297,13 +294,10 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'Mazo\nRápido',
+                          Text(
+                            AppLocalizations.of(context)!.mazoRapidoBoton,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              height: 1.2,
-                            ),
+                            style: const TextStyle(fontWeight: FontWeight.w600, height: 1.2),
                           ),
                         ],
                       ),
@@ -352,18 +346,18 @@ class HomeScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Nueva Carpeta'),
+          title: Text(AppLocalizations.of(context)!.nuevaCarpeta),
           content: TextField(
             controller: nombreController,
-            decoration: const InputDecoration(
-              hintText: 'Ej: Matemáticas, Historia...',
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context)!.ejemploCarpeta,
             ),
             autofocus: true,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(context)!.cancelar),
             ),
             FilledButton(
               onPressed: () async {
@@ -389,8 +383,7 @@ class HomeScreen extends StatelessWidget {
                   }
                 }
               },
-              child: const Text('Crear'),
-            ),
+            child: Text(AppLocalizations.of(context)!.crear),            ),
           ],
         );
       },

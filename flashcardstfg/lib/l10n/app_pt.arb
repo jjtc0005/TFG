@@ -83,5 +83,17 @@
   "errorIA": "Erro do modelo de Inteligência Artificial",
   "carpetaVacia": "Esta pasta está vazia. Crie alguns baralhos",
   "mazogenerado": "Baralho gerado instantaneamente",
-  "errorBaseDatos": "Erro no envio para o banco de dados"
+  "errorBaseDatos": "Erro no envio para o banco de dados",
+
+
+  "queDeseasCrear": "O que você deseja criar?",
+  "carpetaVaciaBoton": "Pasta\nVazia",
+  "mazoRapidoBoton": "Baralho\nRápido",
+  "nuevaCarpeta": "Nova Pasta",
+  "ejemploCarpeta": "Ex: Matemática, História...",
+  "crear": "Criar",
+  "generarConIA": "Gerar com IA",
+  "rendimiento": "Desempenho",
+  "mensajeRendimiento": "Processar textos ou documentos muito longos para gerar um alto número de cartões requer maior capacidade de processamento. Isso atrasará o tempo de criação. Por favor, seja paciente enquanto a IA analisa o conteúdo.",
+  "entendido": "Entendido"
 }

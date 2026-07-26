@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -9,8 +12,12 @@ class AuthService {
   Future<UserCredential?> signInWithGoogle() async {
     try {
 
-      const String webClientid =
-          "607082432922-4r419edu0h5mn6jginlfeshnr9qe4g9m.apps.googleusercontent.com";
+      final String? webClientid = dotenv.env['GOOGLE_CLIENT_ID'];
+
+      if (webClientid == null || webClientid.isEmpty) {
+        print("Error crítico: GOOGLE_CLIENT_ID no configurado en apiKey.env");
+        return null;
+      }
 
       await _googleSignIn.initialize(serverClientId: webClientid);
 

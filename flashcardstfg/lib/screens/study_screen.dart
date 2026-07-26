@@ -37,9 +37,8 @@ class StudyScreen extends StatelessWidget {
           );
         },
         icon: const Icon(Icons.auto_awesome),
-        label: const Text('Generar con IA'),
+        label: Text(AppLocalizations.of(context)!.generarConIA),
       ),
-      // --- FIN DEL AÑADIDO ---
 
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
