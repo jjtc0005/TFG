@@ -42,11 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: const Icon(Icons.login),
                     label: Text(AppLocalizations.of(context)!.mensajeEntrarGoogle),
                     style: ElevatedButton.styleFrom(
-                  // CAMBIO DE COLOR DE FONDO
                       backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-                      // CAMBIO DE COLOR DE TEXTO E ICONO
                       foregroundColor: isDarkMode ? Colors.white : Colors.black87,
-                      // ¡AQUÍ ESTÁ EL BORDE! Sí se puede en ElevatedButton
                       side: BorderSide(
                         color: isDarkMode ? Colors.white24 : Colors.grey.shade300,
                       ),

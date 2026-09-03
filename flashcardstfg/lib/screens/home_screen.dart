@@ -184,7 +184,6 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
 
-      // --- MODIFICADO: Botón flotante clásico que despliega el menú ---
       floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarPanelCreacion(context),
         child: const Icon(Icons.add),
@@ -233,7 +232,6 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- BOTÓN 1: CARPETA VACÍA ---
                   InkWell(
                     onTap: () {
                       Navigator.pop(context);
@@ -266,7 +264,6 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // --- BOTÓN 2: MAZO CON IA (TOTALMENTE ARMONIZADO) ---
                   InkWell(
                     onTap: () {
                       Navigator.pop(context);
@@ -311,7 +308,6 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
-  // --- FIN DEL AÑADIDO ---
 
   Future<void> _cerrarSesion(BuildContext context) async {
     try {
@@ -383,7 +379,8 @@ class HomeScreen extends StatelessWidget {
                   }
                 }
               },
-            child: Text(AppLocalizations.of(context)!.crear),            ),
+            child: Text(AppLocalizations.of(context)!.crear),
+            ),
           ],
         );
       },

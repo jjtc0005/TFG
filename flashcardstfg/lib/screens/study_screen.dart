@@ -23,7 +23,7 @@ class StudyScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(nombreCarpeta), centerTitle: true),
 
-      // --- AÑADIDO: El botón flotante que abre el formulario inteligente ---
+      // El botón flotante que abre el formulario
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
@@ -283,25 +283,21 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Detectamos el modo oscuro aquí
+    // Detectamos el modo oscuro aquí
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      // 2. ARREGLADO: Si es de noche, usa el fondo por defecto (oscuro), si es de día, tu gris clarito
       backgroundColor: isDarkMode
           ? Theme.of(context).scaffoldBackgroundColor
           : Colors.grey.shade100,
       appBar: AppBar(
         title: Text(widget.tituloMazo),
         centerTitle:
-            true, // Opcional, pero suele quedar mejor centrado en esta vista
-        // 1. Le forzamos el MISMO color exacto que tiene tu Scaffold
+            true, 
         backgroundColor: isDarkMode
             ? Theme.of(context).scaffoldBackgroundColor
             : Colors.grey.shade100,
-        // 2. Le quitamos cualquier sombra base
         elevation: 0,
-        // 3. Apagamos el efecto de sombreado automático al hacer scroll (el que viste en el Home)
         scrolledUnderElevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -331,7 +327,6 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        // 3. ARREGLADO: Blanco en oscuro, AzulGrisáceo en claro
                         color: isDarkMode ? Colors.white70 : Colors.blueGrey,
                       ),
                     );
@@ -366,7 +361,7 @@ class _MazoStudyScreenState extends State<MazoStudyScreen> {
                 padding: const EdgeInsets.only(bottom: 30.0),
                 child: Text(
                   '👈 ${AppLocalizations.of(context)!.mensajeDeslizarTocar} 👆',
-                  // 4. ARREGLADO: Gris claro en oscuro, gris normal en claro
+                  // Gris claro en oscuro, gris normal en claro
                   style: TextStyle(
                     color: isDarkMode ? Colors.white54 : Colors.grey,
                   ),

@@ -20,23 +20,23 @@ class AuthService {
 
       await _googleSignIn.initialize(serverClientId: webClientid);
 
-      // 1. Lanzamos la ventana de Google
+      // Lanzamos la ventana de Google
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
-      // 2. Obtenemos los tokens
+      // Obtenemos los tokens
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-      // 3. Crear credencial para Firebase
+      // Crear credencial para Firebase
       final credential = GoogleAuthProvider.credential(
         accessToken: null,
         idToken: googleAuth.idToken,
       );
 
-      // 4. Iniciar sesión en Firebase
+      // Iniciar sesión en Firebase
       final UserCredential userCredential = await _auth.signInWithCredential(
         credential,
       );
 
-      // 5. Guardar usuario en Firestore
+      // Guardar usuario en Firestore
       if (userCredential.user != null) {
         await _guardarUsuario(userCredential.user!);
       }

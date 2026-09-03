@@ -29,12 +29,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 2. PRIMER ESCUCHADOR: Vigila si el usuario cambia a Modo Oscuro/Claro
+    // PRIMER ESCUCHADOR: Vigila si el usuario cambia a Modo Oscuro/Claro
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
       builder: (context, currentMode, _) {
 
-        // 3. SEGUNDO ESCUCHADOR: Vigila si el usuario cambia de Idioma
+        // SEGUNDO ESCUCHADOR: Vigila si el usuario cambia de Idioma
         return ValueListenableBuilder<Locale>(
           valueListenable: localeNotifier,
           builder: (context, localeActual, _) {

@@ -14,7 +14,6 @@ import 'package:flashcardstfg/widgets/selector_carpeta.dart';
 enum MetodoEntrada { texto, imagen, archivo }
 
 class CreateFlashcardScreen extends StatefulWidget {
-  // --- AÑADIDO: Parámetros opcionales para saber si venimos desde dentro de una carpeta ---
   final String? carpetaIdPredefinida;
   final String? nombreCarpetaPredefinida;
 
@@ -23,7 +22,6 @@ class CreateFlashcardScreen extends StatefulWidget {
     this.carpetaIdPredefinida, 
     this.nombreCarpetaPredefinida
   });
-  // --- FIN DEL AÑADIDO ---
 
   @override
   State<CreateFlashcardScreen> createState() => _CreateFlashcardScreen();
@@ -160,7 +158,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
               ),
               const SizedBox(height: 16),
 
-              // --- MODIFICADO: Condicional para mostrar selector o texto fijo ---
               if (widget.nombreCarpetaPredefinida != null)
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -194,7 +191,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                     });
                   },
                 ),
-              // --- FIN DE LO MODIFICADO ---
               
               const SizedBox(height: 16),
 
@@ -215,13 +211,15 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                             children: [
                               const Icon(Icons.info, color: Colors.blueAccent),
                               const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!.rendimiento, style: const TextStyle(fontSize: 18)),                            ],
+                              Text(AppLocalizations.of(context)!.rendimiento, style: const TextStyle(fontSize: 18)),
+                              ],
                           ),
                           content: Text(AppLocalizations.of(context)!.mensajeRendimiento),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
-                              child: Text(AppLocalizations.of(context)!.entendido),                            ),
+                              child: Text(AppLocalizations.of(context)!.entendido),
+                              ),
                           ],
                         ),
                       );
@@ -568,7 +566,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           
       String carpetaDestino;
 
-      // --- MODIFICADO: Condicional para no buscar la carpeta si ya sabemos su ID ---
       if (widget.carpetaIdPredefinida != null) {
         carpetaDestino = widget.carpetaIdPredefinida!;
       } else {
@@ -586,7 +583,6 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
           carpetaDestino = nuevaCarpeta.id;
         }
       }
-      // --- FIN DE LO MODIFICADO ---
 
       final mazoRef = carpetaPath.doc(carpetaDestino).collection('Mazos').doc();
 

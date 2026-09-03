@@ -86,7 +86,7 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada>
             child: _esFrente
                 ? _construirLadoTarjeta(
                     texto: widget.pregunta,
-                    // ANVERSO: Negro en modo oscuro, Blanco en claro
+                    // anverso: Negro en modo oscuro, Blanco en claro
                     colorFondo: isDarkMode
                         ? const Color(0xFF121212)
                         : Colors.white,
@@ -104,10 +104,10 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada>
                         colorFondo: isDarkMode
                             ? const Color(0xFF0D2B16)
                             : Colors.green.shade50,
-                        // ARREGLADO: Blanco en modo oscuro, y un verde muy oscuro/negro en modo claro
+                        //Blanco en modo oscuro, y un verde muy oscuro/negro en modo claro
                         colorTexto: isDarkMode
                             ? Colors.white
-                            : Colors.green.shade900, // <--- Este es oscuro y elegante
+                            : Colors.green.shade900,
                         etiqueta: AppLocalizations.of(context)!.respuesta,
                         icono: Icons.check_circle_outline,
                         isDarkMode: isDarkMode,
@@ -178,7 +178,6 @@ class _FlashcardAnimadaState extends State<FlashcardAnimada>
               ),
             ),
             const Spacer(),
-            // TEXTO DE ABAJO: Ahora pasa a blanco en modo oscuro
             Text(
               AppLocalizations.of(context)!.voltear,
               style: TextStyle(
