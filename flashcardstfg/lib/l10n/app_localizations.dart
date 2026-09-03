@@ -579,6 +579,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Entendido'**
   String get entendido;
+
+  /// No description provided for @errorContenidoTexto.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor, pega tus apuntes antes de generar.'**
+  String get errorContenidoTexto;
+
+  /// No description provided for @errorContenidoImagen.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor, toma o sube una imagen antes de generar.'**
+  String get errorContenidoImagen;
+
+  /// No description provided for @errorContenidoArchivo.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor, sube un archivo antes de generar.'**
+  String get errorContenidoArchivo;
 }
 
 class _AppLocalizationsDelegate

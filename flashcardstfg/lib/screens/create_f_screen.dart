@@ -32,6 +32,7 @@ class CreateFlashcardScreen extends StatefulWidget {
 class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _mensajeCarga;
+  String? _errorContenido;
 
   final TextEditingController _tituloController = TextEditingController();
   final TextEditingController _almacenController = TextEditingController();
@@ -70,6 +71,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
       if (fotoTomada != null) {
         setState(() {
           _imagenSeleccionada = File(fotoTomada.path);
+          _errorContenido = null;
         });
       }
     } catch (e) {
@@ -94,6 +96,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         setState(() {
           _archivoSeleccionado = File(resultado.files.single.path!);
           _nombreArchivo = resultado.files.single.name;
+          _errorContenido = null; 
         });
       }
     } catch (e) {
@@ -271,6 +274,7 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                 onSelectionChanged: (Set<MetodoEntrada> nuevaSeleccion) {
                   setState(() {
                     _metodoSeleccionado = nuevaSeleccion.first;
+                    _errorContenido = null; 
                   });
                 },
               ),
@@ -303,6 +307,18 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                         AppLocalizations.of(context)!.subirArchivo,
                         _seleccionarArchivo,
                       ),
+              
+              if (_errorContenido != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    _errorContenido!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
 
               const SizedBox(height: 40),
 
@@ -323,11 +339,34 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
                       ),
                     )
                   : FilledButton.icon(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _generarConIA();
-                        }
-                      },
+                    onPressed: () {
+                      bool formularioValido = _formKey.currentState!.validate();
+                      bool contenidoValido = true;
+                      if (_metodoSeleccionado == MetodoEntrada.texto &&
+                          _apuntesController.text.trim().isEmpty) {
+                        setState(() {
+                          _errorContenido = AppLocalizations.of(context)!.errorContenidoTexto;
+                        });
+                        contenidoValido = false;
+                      } else if (_metodoSeleccionado == MetodoEntrada.imagen &&
+                          _imagenSeleccionada == null) {
+                        setState(() {
+                          _errorContenido = AppLocalizations.of(context)!.errorContenidoImagen;
+                        });
+                        contenidoValido = false;
+                      } else if (_metodoSeleccionado == MetodoEntrada.archivo &&
+                          _archivoSeleccionado == null) {
+                        setState(() {
+                          _errorContenido = AppLocalizations.of(context)!.errorContenidoArchivo;
+                        });
+                        contenidoValido = false;
+                      } else {
+                        setState(() => _errorContenido = null);
+                      }
+                      if (formularioValido && contenidoValido) {
+                        _generarConIA();
+                      }
+                    },
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           vertical: 16,
@@ -453,15 +492,29 @@ class _CreateFlashcardScreen extends State<CreateFlashcardScreen> {
         () => _mensajeCarga = AppLocalizations.of(context)!.analizandoIA,
       );
 
+      // --- BENCHMARK: Cronómetro para medir rendimiento ---
+      final cronometro = Stopwatch()..start();
+
       final response = await model.generateContent([
         Content.multi(partesPrompt),
       ]);
+
+      final tiempoIA = cronometro.elapsedMilliseconds;
+      print('[BENCHMARK] Tiempo IA: ${tiempoIA}ms (${(tiempoIA / 1000).toStringAsFixed(1)}s) — Tarjetas pedidas: $cantidad');
 
       setState(() => _mensajeCarga = AppLocalizations.of(context)!.saveFl);
       if (mounted) {
         await _guardarRepuestaBbdd(response.text ?? '');
       }
+
+      final tiempoTotal = cronometro.elapsedMilliseconds;
+      cronometro.stop();
+      print('[BENCHMARK] Tiempo TOTAL (IA + BBDD): ${tiempoTotal}ms (${(tiempoTotal / 1000).toStringAsFixed(1)}s) — Tarjetas pedidas: $cantidad');
+      
+      // --- FIN BENCHMARK ---
     } catch (e) {
+
+
       setState(() => _mensajeCarga = null);
       if (mounted) {
         ScaffoldMessenger.of(

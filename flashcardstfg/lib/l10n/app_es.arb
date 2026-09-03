@@ -98,5 +98,8 @@
   "generarConIA": "Generar con IA",
   "rendimiento": "Rendimiento",
   "mensajeRendimiento": "Procesar textos o documentos muy extensos para generar un alto número de tarjetas requiere mayor capacidad de procesamiento. Esto ralentizará el tiempo de creación. Por favor, sé paciente mientras la IA analiza el contenido.",
-  "entendido": "Entendido"
+  "entendido": "Entendido",
+  "errorContenidoTexto": "Por favor, pega tus apuntes antes de generar.",
+  "errorContenidoImagen": "Por favor, toma o sube una imagen antes de generar.",
+  "errorContenidoArchivo": "Por favor, sube un archivo antes de generar."
 }

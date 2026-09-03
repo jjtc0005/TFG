@@ -95,5 +95,9 @@
   "generarConIA": "Gerar com IA",
   "rendimiento": "Desempenho",
   "mensajeRendimiento": "Processar textos ou documentos muito longos para gerar um alto número de cartões requer maior capacidade de processamento. Isso atrasará o tempo de criação. Por favor, seja paciente enquanto a IA analisa o conteúdo.",
-  "entendido": "Entendido"
+  "entendido": "Entendido",
+  "errorContenidoTexto": "Por favor, cole suas anotações antes de gerar.",
+  "errorContenidoImagen": "Por favor, tire ou envie uma imagem antes de gerar.",
+  "errorContenidoArchivo": "Por favor, envie um arquivo antes de gerar."
+
 }

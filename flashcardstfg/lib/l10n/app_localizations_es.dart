@@ -249,4 +249,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get entendido => 'Entendido';
+
+  @override
+  String get errorContenidoTexto =>
+      'Por favor, pega tus apuntes antes de generar.';
+
+  @override
+  String get errorContenidoImagen =>
+      'Por favor, toma o sube una imagen antes de generar.';
+
+  @override
+  String get errorContenidoArchivo =>
+      'Por favor, sube un archivo antes de generar.';
 }

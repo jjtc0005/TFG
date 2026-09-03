@@ -95,5 +95,8 @@
   "generarConIA": "Generate with AI",
   "rendimiento": "Performance",
   "mensajeRendimiento": "Processing very long texts or documents to generate a high number of flashcards requires more processing power. This will slow down the creation time. Please be patient while the AI analyzes the content.",
-  "entendido": "Understood"
+  "entendido": "Understood",
+  "errorContenidoTexto": "Please paste your notes before generating.",
+  "errorContenidoImagen": "Please take or upload an image before generating.",
+  "errorContenidoArchivo": "Please upload a file before generating."
 }

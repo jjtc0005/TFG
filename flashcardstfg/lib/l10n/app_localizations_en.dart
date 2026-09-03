@@ -249,4 +249,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get entendido => 'Understood';
+
+  @override
+  String get errorContenidoTexto =>
+      'Please paste your notes before generating.';
+
+  @override
+  String get errorContenidoImagen =>
+      'Please take or upload an image before generating.';
+
+  @override
+  String get errorContenidoArchivo => 'Please upload a file before generating.';
 }

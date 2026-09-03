@@ -249,4 +249,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get entendido => 'Entendido';
+
+  @override
+  String get errorContenidoTexto =>
+      'Por favor, cole suas anotações antes de gerar.';
+
+  @override
+  String get errorContenidoImagen =>
+      'Por favor, tire ou envie uma imagem antes de gerar.';
+
+  @override
+  String get errorContenidoArchivo =>
+      'Por favor, envie um arquivo antes de gerar.';
 }
